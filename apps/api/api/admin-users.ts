@@ -15,8 +15,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       orderBy: { createdAt: 'desc' },
     });
 
+    type UserWithRole = Awaited<ReturnType<typeof prisma.user.findMany<{ include: { role: true } }>>>[0];
+
     ok(res, {
-      users: users.map((u) => ({
+      users: users.map((u: UserWithRole) => ({
         id: u.id,
         email: u.email,
         name: u.name,

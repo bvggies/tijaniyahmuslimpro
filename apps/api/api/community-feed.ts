@@ -20,8 +20,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       take: 50,
     });
 
+    type PostWithDetails = Awaited<ReturnType<typeof prisma.post.findMany<{ include: { author: true; likes: true; _count: { select: { comments: true; likes: true } } } }>>>[0];
+    type Like = PostWithDetails['likes'][0];
+
     ok(res, {
-      posts: posts.map((p) => ({
+      posts: posts.map((p: PostWithDetails) => ({
         id: p.id,
         content: p.content,
         imageUrl: p.imageUrl,
@@ -32,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         likeCount: p._count.likes,
         commentCount: p._count.comments,
-        likedByViewer: viewer ? p.likes.some((l) => l.userId === viewer.id) : false,
+        likedByViewer: viewer ? p.likes.some((l: Like) => l.userId === viewer.id) : false,
       })),
     });
   } catch (error) {
