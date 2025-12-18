@@ -1,0 +1,59 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@tmp/db';
+import {
+  authLoginSchema,
+  authResponseSchema,
+  apiError,
+} from '@tmp/shared';
+import { createSession, mapRoleName, signAccessToken } from '../lib/auth';
+import { badRequest, methodNotAllowed, ok, serverError } from '../lib/response';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return methodNotAllowed(res);
+
+  try {
+    const parseResult = authLoginSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return badRequest(res, apiError('INVALID_INPUT', 'INVALID_INPUT', parseResult.error.flatten()));
+    }
+
+    const { email, password } = parseResult.data;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { role: true },
+    });
+    if (!user) {
+      return badRequest(res, apiError('INVALID_CREDENTIALS', 'INVALID_CREDENTIALS'));
+    }
+
+    const okPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!okPassword) {
+      return badRequest(res, apiError('INVALID_CREDENTIALS', 'INVALID_CREDENTIALS'));
+    }
+
+    const role = mapRoleName(user.role.name);
+    const accessToken = signAccessToken(user.id, role);
+    const refreshToken = await createSession(user.id, role);
+
+    const payload = {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role,
+      },
+    };
+
+    const validated = authResponseSchema.parse(payload);
+    ok(res, validated);
+  } catch (error) {
+    console.error('auth-login error', error);
+    serverError(res);
+  }
+}
+
+

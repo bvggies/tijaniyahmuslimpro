@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Tijaniyah Muslim Pro",
+    "slug": "tijaniyah-muslim-pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "../../assets/AppIcons/appstore.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "../../assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#061c1e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tijaniyah.muslimpro"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "../../assets/AppIcons/playstore.png",
+        "backgroundColor": "#061c1e"
+      },
+      "package": "com.tijaniyah.muslimpro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "tijaniyah-muslim-pro-placeholder"
+      }
+    }
+  }
+}
+
+

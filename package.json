@@ -1,0 +1,22 @@
+{
+  "name": "tijaniyah-muslim-pro",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo \"Use app-level build scripts\"",
+    "lint": "echo \"Add linting per app\""
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "prettier": "^3.3.3"
+  }
+}
+
+
