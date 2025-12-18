@@ -15,8 +15,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const totalDonations = campaigns.reduce((sum, c) => {
-      const donationSum = c.donations.reduce((s, d) => s + Number(d.amount), 0);
+    const totalDonations = campaigns.reduce((sum: number, c) => {
+      const donationSum = c.donations.reduce((s: number, d) => s + Number(d.amount), 0);
       return sum + donationSum;
     }, 0);
 
@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         isActive: c.isActive,
         createdAt: c.createdAt,
         donationCount: c.donations.length,
-        donationSum: c.donations.reduce((s, d) => s + Number(d.amount), 0),
+        donationSum: c.donations.reduce((s: number, d) => s + Number(d.amount), 0),
       })),
     });
   } catch (error) {

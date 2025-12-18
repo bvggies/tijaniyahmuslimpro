@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     ok(res, {
-      posts: posts.map((p) => ({
+      posts: posts.map((p: typeof posts[0]) => ({
         id: p.id,
         content: p.content,
         imageUrl: p.imageUrl,
@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         likeCount: p._count.likes,
         commentCount: p._count.comments,
-        likedByViewer: viewer ? p.likes.some((l) => l.userId === viewer.id) : false,
+        likedByViewer: viewer ? p.likes.some((l: typeof p.likes[0]) => l.userId === viewer.id) : false,
       })),
     });
   } catch (error) {
