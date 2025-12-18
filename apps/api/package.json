@@ -7,7 +7,8 @@
   },
   "scripts": {
     "dev": "vercel dev",
-    "build": "tsc -p tsconfig.json"
+    "build": "cd ../../packages/db && npx prisma generate && cd ../../apps/api && tsc -p tsconfig.json",
+    "postinstall": "cd ../../packages/db && npx prisma generate"
   },
   "dependencies": {
     "@tmp/db": "1.0.0",

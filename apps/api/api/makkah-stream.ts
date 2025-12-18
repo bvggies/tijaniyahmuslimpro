@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const settings = await prisma.appSettings.findFirst();
     
     ok(res, {
-      streamUrl: settings?.makkahStreamUrl || null,
+      makkahStreamUrl: settings?.makkahStreamUrl || null,
     });
   } catch (error) {
     console.error('makkah-stream error', error);

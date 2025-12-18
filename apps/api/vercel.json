@@ -3,7 +3,9 @@
     "api/**/*.ts": {
       "runtime": "@vercel/node@3.2.0"
     }
-  }
+  },
+  "installCommand": "npm install",
+  "buildCommand": "cd ../../packages/db && npx prisma generate && cd ../../apps/api && npm run build"
 }
 
 
