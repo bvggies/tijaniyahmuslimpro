@@ -58,7 +58,7 @@ AI_NOOR_PROVIDER_KEY=your-ai-provider-key
 - **Mobile (`apps/mobile`)**
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL=https://your-api.vercel.app
+EXPO_PUBLIC_API_BASE_URL=https://tijaniyahmuslimpro-admin-mu.vercel.app
 EXPO_PUBLIC_MAKKAH_STREAM_URL=$MAKKAH_STREAM_URL
 EXPO_PUBLIC_PLACES_API_KEY=$PLACES_API_KEY
 ```
@@ -66,7 +66,7 @@ EXPO_PUBLIC_PLACES_API_KEY=$PLACES_API_KEY
 - **Admin (`apps/admin`)**
 
 ```bash
-REACT_APP_API_BASE_URL=https://your-api.vercel.app
+REACT_APP_API_BASE_URL=https://tijaniyahmuslimpro-admin-mu.vercel.app
 ```
 
 - **Website (`apps/website`)**
@@ -74,7 +74,7 @@ REACT_APP_API_BASE_URL=https://your-api.vercel.app
 ```bash
 VITE_APPSTORE_URL=https://apps.apple.com/your-app
 VITE_PLAYSTORE_URL=https://play.google.com/store/apps/details?id=your.app.id
-VITE_API_BASE_URL=https://your-api.vercel.app
+VITE_API_BASE_URL=https://tijaniyahmuslimpro-admin-mu.vercel.app
 ```
 
 ### 5. Running locally
