@@ -16,21 +16,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const totalDonations = campaigns.reduce(
-      (sum, c) => sum + c.donations.reduce((s, d) => s + d.amount, 0),
+      (sum: number, c) => sum + c.donations.reduce((s: number, d) => s + d.amount, 0),
       0,
     );
 
     ok(res, {
       totalCampaigns: campaigns.length,
       totalDonations,
-      campaigns: campaigns.map(c => ({
+      campaigns: campaigns.map((c) => ({
         id: c.id,
         title: c.title,
         goalAmount: c.goalAmount,
         isActive: c.isActive,
         createdAt: c.createdAt,
         donationCount: c.donations.length,
-        donationSum: c.donations.reduce((s, d) => s + d.amount, 0),
+        donationSum: c.donations.reduce((s: number, d) => s + d.amount, 0),
       })),
     });
   } catch (error) {

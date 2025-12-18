@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         take: 100,
       });
       return ok(res, {
-        posts: posts.map(p => ({
+        posts: posts.map((p) => ({
           id: p.id,
           content: p.content,
           createdAt: p.createdAt,

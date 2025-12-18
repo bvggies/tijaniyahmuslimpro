@@ -16,7 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     ok(res, {
-      users: users.map(u => ({
+      users: users.map((u) => ({
         id: u.id,
         email: u.email,
         name: u.name,

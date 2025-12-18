@@ -30,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return ok(res, {
-        messages: messages.map(m => ({
+        messages: messages.map((m) => ({
           id: m.id,
           content: m.content,
           createdAt: m.createdAt,
@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { id: roomId },
       include: { members: true },
     });
-    if (!room || !room.members.some(m => m.userId === user.id)) {
+    if (!room || !room.members.some((m) => m.userId === user.id)) {
       return badRequest(res, apiError('FORBIDDEN', 'FORBIDDEN'));
     }
 
