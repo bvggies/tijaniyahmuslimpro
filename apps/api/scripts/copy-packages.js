@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
+const fs = require('fs');
+const path = require('path');
+
 const apiDir = path.join(__dirname, '..');
 const rootDir = path.join(apiDir, '../..');
 
@@ -8,57 +11,73 @@ console.log('📦 Starting package copy...');
 console.log('API Dir:', apiDir);
 console.log('Root Dir:', rootDir);
 
-// Ensure node_modules exists
+// Copy to both node_modules (for local dev) and _packages (for Vercel deployment)
 const nodeModulesDir = path.join(apiDir, 'node_modules');
+const packagesDir = path.join(apiDir, '_packages');
+
+// Ensure directories exist
 if (!fs.existsSync(nodeModulesDir)) {
-  console.log('Creating node_modules directory...');
   fs.mkdirSync(nodeModulesDir, { recursive: true });
+}
+if (!fs.existsSync(packagesDir)) {
+  fs.mkdirSync(packagesDir, { recursive: true });
+}
+
+function copyPackage(packageName, srcPath) {
+  // Copy to node_modules
+  const nodeModulesPackageDir = path.join(nodeModulesDir, '@tmp', packageName);
+  if (!fs.existsSync(nodeModulesPackageDir)) {
+    fs.mkdirSync(nodeModulesPackageDir, { recursive: true });
+  }
+  
+  const nodeModulesSrc = path.join(srcPath, 'src');
+  const nodeModulesDest = path.join(nodeModulesPackageDir, 'src');
+  if (fs.existsSync(nodeModulesSrc)) {
+    copyRecursiveSync(nodeModulesSrc, nodeModulesDest);
+    const pkgJson = path.join(srcPath, 'package.json');
+    if (fs.existsSync(pkgJson)) {
+      fs.copyFileSync(pkgJson, path.join(nodeModulesPackageDir, 'package.json'));
+    }
+    console.log(`✅ Copied @tmp/${packageName} to node_modules`);
+  }
+  
+  // Copy to _packages (for Vercel)
+  const packagesPackageDir = path.join(packagesDir, '@tmp', packageName);
+  if (!fs.existsSync(packagesPackageDir)) {
+    fs.mkdirSync(packagesPackageDir, { recursive: true });
+  }
+  
+  const packagesSrc = path.join(srcPath, 'src');
+  const packagesDest = path.join(packagesPackageDir, 'src');
+  if (fs.existsSync(packagesSrc)) {
+    copyRecursiveSync(packagesSrc, packagesDest);
+    const pkgJson = path.join(srcPath, 'package.json');
+    if (fs.existsSync(pkgJson)) {
+      fs.copyFileSync(pkgJson, path.join(packagesPackageDir, 'package.json'));
+    }
+    console.log(`✅ Copied @tmp/${packageName} to _packages`);
+  }
 }
 
 // Copy shared package
-const sharedPackageDir = path.join(nodeModulesDir, '@tmp', 'shared');
-if (!fs.existsSync(sharedPackageDir)) {
-  fs.mkdirSync(sharedPackageDir, { recursive: true });
-}
-
-const sharedSrc = path.join(rootDir, 'packages/shared/src');
-const sharedDest = path.join(sharedPackageDir, 'src');
+const sharedSrc = path.join(rootDir, 'packages/shared');
 if (fs.existsSync(sharedSrc)) {
-  console.log('Copying @tmp/shared from:', sharedSrc, 'to:', sharedDest);
-  copyRecursiveSync(sharedSrc, sharedDest);
-  // Copy package.json
-  const sharedPkgJson = path.join(rootDir, 'packages/shared/package.json');
-  if (fs.existsSync(sharedPkgJson)) {
-    fs.copyFileSync(sharedPkgJson, path.join(sharedPackageDir, 'package.json'));
-  }
-  console.log('✅ Copied @tmp/shared package');
+  copyPackage('shared', sharedSrc);
 } else {
   console.error('❌ Shared source not found:', sharedSrc);
 }
 
 // Copy db package
-const dbPackageDir = path.join(nodeModulesDir, '@tmp', 'db');
-if (!fs.existsSync(dbPackageDir)) {
-  fs.mkdirSync(dbPackageDir, { recursive: true });
-}
-
-const dbSrc = path.join(rootDir, 'packages/db/src');
-const dbDest = path.join(dbPackageDir, 'src');
+const dbSrc = path.join(rootDir, 'packages/db');
 if (fs.existsSync(dbSrc)) {
-  console.log('Copying @tmp/db from:', dbSrc, 'to:', dbDest);
-  copyRecursiveSync(dbSrc, dbDest);
-  // Copy package.json
-  const dbPkgJson = path.join(rootDir, 'packages/db/package.json');
-  if (fs.existsSync(dbPkgJson)) {
-    fs.copyFileSync(dbPkgJson, path.join(dbPackageDir, 'package.json'));
-  }
-  // Copy prisma directory (needed for generated client)
-  const prismaSrc = path.join(rootDir, 'packages/db/prisma');
-  const prismaDest = path.join(dbPackageDir, 'prisma');
+  copyPackage('db', dbSrc);
+  
+  // Also copy Prisma files to node_modules (needed for Prisma client)
+  const prismaSrc = path.join(dbSrc, 'prisma');
+  const prismaDest = path.join(nodeModulesDir, '@tmp', 'db', 'prisma');
   if (fs.existsSync(prismaSrc)) {
     copyRecursiveSync(prismaSrc, prismaDest);
   }
-  console.log('✅ Copied @tmp/db package');
 } else {
   console.error('❌ DB source not found:', dbSrc);
 }

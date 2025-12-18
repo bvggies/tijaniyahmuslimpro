@@ -31,3 +31,6 @@ dist
 build
 .vercel
 
+# Keep _packages for deployment
+!_packages
+
