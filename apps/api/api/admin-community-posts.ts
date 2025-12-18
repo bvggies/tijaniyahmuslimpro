@@ -25,10 +25,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         take: 100,
       });
-      type PostWithAuthor = Awaited<ReturnType<typeof prisma.post.findMany<{ include: { author: true; _count: { select: { comments: true; likes: true } } } }>>>[0];
-      
       return ok(res, {
-        posts: posts.map((p: PostWithAuthor) => ({
+        posts: posts.map((p) => ({
           id: p.id,
           content: p.content,
           createdAt: p.createdAt,
