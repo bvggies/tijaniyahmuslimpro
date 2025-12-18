@@ -7,7 +7,8 @@
   },
   "scripts": {
     "dev": "vercel dev",
-    "build": "cd ../../packages/db && npx prisma generate && cd ../../apps/api && tsc -p tsconfig.json",
+    "prebuild": "node scripts/copy-packages.js",
+    "build": "tsc -p tsconfig.json",
     "postinstall": "cd ../../packages/db && npx prisma generate"
   },
   "dependencies": {

@@ -4,8 +4,8 @@
       "runtime": "@vercel/node@3.2.0"
     }
   },
-  "installCommand": "npm install && cd ../../packages/db && npx prisma@6.2.1 generate",
-  "buildCommand": "npm run build"
+  "installCommand": "npm install",
+  "buildCommand": "cd ../../packages/db && npx prisma@6.2.1 generate && cd ../../apps/api && npm run build"
 }
 
 
