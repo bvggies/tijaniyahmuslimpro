@@ -28,7 +28,8 @@
     "extra": {
       "eas": {
         "projectId": "tijaniyah-muslim-pro-placeholder"
-      }
+      },
+      "apiBaseUrl": "https://tijaniyahmuslimpro-admin-mu.vercel.app"
     }
   }
 }

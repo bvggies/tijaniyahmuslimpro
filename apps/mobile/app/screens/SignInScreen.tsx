@@ -6,7 +6,7 @@ import { AuthStackParamList } from '../auth-stack';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignIn'>;
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://tijaniyahmuslimpro-admin-mu.vercel.app';
 
 export function SignInScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');

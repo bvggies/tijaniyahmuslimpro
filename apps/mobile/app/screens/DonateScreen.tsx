@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://tijaniyahmuslimpro-admin-mu.vercel.app';
 
 interface CampaignDto {
   id: string;
