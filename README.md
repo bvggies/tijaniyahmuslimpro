@@ -133,9 +133,10 @@ Create **three Vercel projects**, each pointing at a different subdirectory of t
   - Framework preset: Create React App
   - Build command: `npm run build`
   - Output directory: `build`
-  - Env vars: `REACT_APP_API_BASE_URL` (set to the deployed API URL)
+  - Env vars: `REACT_APP_API_BASE_URL=https://tijaniyahmuslimpro-admin-mu.vercel.app`
 
-Update `EXPO_PUBLIC_API_BASE_URL` in the mobile app to the deployed API URL.
+- **Mobile app**
+  - Update `EXPO_PUBLIC_API_BASE_URL` to `https://tijaniyahmuslimpro-admin-mu.vercel.app` in `.env` or `app.json`
 
 ### 7. Auth, RBAC, and admin flows
 
