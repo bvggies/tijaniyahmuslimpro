@@ -4,9 +4,14 @@ const path = require('path');
 const apiDir = path.join(__dirname, '..');
 const rootDir = path.join(apiDir, '../..');
 
+console.log('📦 Starting package copy...');
+console.log('API Dir:', apiDir);
+console.log('Root Dir:', rootDir);
+
 // Ensure node_modules exists
 const nodeModulesDir = path.join(apiDir, 'node_modules');
 if (!fs.existsSync(nodeModulesDir)) {
+  console.log('Creating node_modules directory...');
   fs.mkdirSync(nodeModulesDir, { recursive: true });
 }
 
@@ -19,6 +24,7 @@ if (!fs.existsSync(sharedPackageDir)) {
 const sharedSrc = path.join(rootDir, 'packages/shared/src');
 const sharedDest = path.join(sharedPackageDir, 'src');
 if (fs.existsSync(sharedSrc)) {
+  console.log('Copying @tmp/shared from:', sharedSrc, 'to:', sharedDest);
   copyRecursiveSync(sharedSrc, sharedDest);
   // Copy package.json
   const sharedPkgJson = path.join(rootDir, 'packages/shared/package.json');
@@ -26,6 +32,8 @@ if (fs.existsSync(sharedSrc)) {
     fs.copyFileSync(sharedPkgJson, path.join(sharedPackageDir, 'package.json'));
   }
   console.log('✅ Copied @tmp/shared package');
+} else {
+  console.error('❌ Shared source not found:', sharedSrc);
 }
 
 // Copy db package
@@ -37,6 +45,7 @@ if (!fs.existsSync(dbPackageDir)) {
 const dbSrc = path.join(rootDir, 'packages/db/src');
 const dbDest = path.join(dbPackageDir, 'src');
 if (fs.existsSync(dbSrc)) {
+  console.log('Copying @tmp/db from:', dbSrc, 'to:', dbDest);
   copyRecursiveSync(dbSrc, dbDest);
   // Copy package.json
   const dbPkgJson = path.join(rootDir, 'packages/db/package.json');
@@ -50,6 +59,8 @@ if (fs.existsSync(dbSrc)) {
     copyRecursiveSync(prismaSrc, prismaDest);
   }
   console.log('✅ Copied @tmp/db package');
+} else {
+  console.error('❌ DB source not found:', dbSrc);
 }
 
 function copyRecursiveSync(src, dest) {
