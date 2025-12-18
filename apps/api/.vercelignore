@@ -31,6 +31,6 @@ dist
 build
 .vercel
 
-# Keep _packages for deployment
-!_packages
+# Keep workspace packages in node_modules
+!node_modules/@tmp
 

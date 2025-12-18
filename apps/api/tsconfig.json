@@ -3,16 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "CommonJS",
-    "target": "ES2020",
-    "baseUrl": ".",
-    "paths": {
-      "@tmp/shared": ["./_packages/@tmp/shared/src/index.ts"],
-      "@tmp/shared/*": ["./_packages/@tmp/shared/src/*"],
-      "@tmp/db": ["./_packages/@tmp/db/src/index.ts"],
-      "@tmp/db/*": ["./_packages/@tmp/db/src/*"]
-    }
+    "target": "ES2020"
   },
-  "include": ["api/**/*.ts", "lib/**/*.ts", "_packages/**/*.ts"]
+  "include": ["api/**/*.ts", "lib/**/*.ts"]
 }
 
 
