@@ -1,9 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const fs = require('fs');
-const path = require('path');
-
 const apiDir = path.join(__dirname, '..');
 const rootDir = path.join(apiDir, '../..');
 
