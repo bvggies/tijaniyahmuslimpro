@@ -4,7 +4,7 @@
       "runtime": "@vercel/node@3.2.0"
     }
   },
-  "installCommand": "npm install && cd ../../packages/db && npx prisma@6.2.1 generate && cd ../../apps/api && node scripts/copy-packages.js",
+  "installCommand": "npm install && cd ../../packages/shared && npm run build && cd ../db && npx prisma@6.2.1 generate && npm run build && cd ../../apps/api && node scripts/copy-packages.js",
   "buildCommand": "npm run build"
 }
 

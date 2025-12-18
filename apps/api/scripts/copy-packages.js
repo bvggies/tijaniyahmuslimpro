@@ -21,38 +21,31 @@ if (!fs.existsSync(packagesDir)) {
 }
 
 function copyPackage(packageName, srcPath) {
-  // Copy to node_modules
+  // Copy compiled dist to node_modules
   const nodeModulesPackageDir = path.join(nodeModulesDir, '@tmp', packageName);
   if (!fs.existsSync(nodeModulesPackageDir)) {
     fs.mkdirSync(nodeModulesPackageDir, { recursive: true });
   }
   
-  const nodeModulesSrc = path.join(srcPath, 'src');
-  const nodeModulesDest = path.join(nodeModulesPackageDir, 'src');
-  if (fs.existsSync(nodeModulesSrc)) {
-    copyRecursiveSync(nodeModulesSrc, nodeModulesDest);
-    const pkgJson = path.join(srcPath, 'package.json');
-    if (fs.existsSync(pkgJson)) {
-      fs.copyFileSync(pkgJson, path.join(nodeModulesPackageDir, 'package.json'));
-    }
-    console.log(`✅ Copied @tmp/${packageName} to node_modules`);
+  // Try to copy dist (compiled JS) first, fallback to src (TS) if dist doesn't exist
+  const distPath = path.join(srcPath, 'dist');
+  const srcPath_actual = path.join(srcPath, 'src');
+  const nodeModulesDest = nodeModulesPackageDir;
+  
+  if (fs.existsSync(distPath)) {
+    // Copy compiled JavaScript
+    copyRecursiveSync(distPath, path.join(nodeModulesDest, 'dist'));
+    console.log(`✅ Copied @tmp/${packageName} dist to node_modules`);
+  } else if (fs.existsSync(srcPath_actual)) {
+    // Fallback: copy TypeScript source
+    copyRecursiveSync(srcPath_actual, path.join(nodeModulesDest, 'src'));
+    console.log(`⚠️  Copied @tmp/${packageName} src (TS) to node_modules (dist not found)`);
   }
   
-  // Copy to _packages (for Vercel)
-  const packagesPackageDir = path.join(packagesDir, '@tmp', packageName);
-  if (!fs.existsSync(packagesPackageDir)) {
-    fs.mkdirSync(packagesPackageDir, { recursive: true });
-  }
-  
-  const packagesSrc = path.join(srcPath, 'src');
-  const packagesDest = path.join(packagesPackageDir, 'src');
-  if (fs.existsSync(packagesSrc)) {
-    copyRecursiveSync(packagesSrc, packagesDest);
-    const pkgJson = path.join(srcPath, 'package.json');
-    if (fs.existsSync(pkgJson)) {
-      fs.copyFileSync(pkgJson, path.join(packagesPackageDir, 'package.json'));
-    }
-    console.log(`✅ Copied @tmp/${packageName} to _packages`);
+  // Copy package.json
+  const pkgJson = path.join(srcPath, 'package.json');
+  if (fs.existsSync(pkgJson)) {
+    fs.copyFileSync(pkgJson, path.join(nodeModulesDest, 'package.json'));
   }
 }
 
@@ -74,6 +67,17 @@ if (fs.existsSync(dbSrc)) {
   const prismaDest = path.join(nodeModulesDir, '@tmp', 'db', 'prisma');
   if (fs.existsSync(prismaSrc)) {
     copyRecursiveSync(prismaSrc, prismaDest);
+  }
+  
+  // Copy node_modules/@prisma/client if it exists (for Prisma client)
+  const prismaClientSrc = path.join(dbSrc, 'node_modules', '@prisma', 'client');
+  const prismaClientDest = path.join(nodeModulesDir, '@prisma', 'client');
+  if (fs.existsSync(prismaClientSrc)) {
+    if (!fs.existsSync(path.join(nodeModulesDir, '@prisma'))) {
+      fs.mkdirSync(path.join(nodeModulesDir, '@prisma'), { recursive: true });
+    }
+    copyRecursiveSync(prismaClientSrc, prismaClientDest);
+    console.log('✅ Copied @prisma/client to node_modules');
   }
 } else {
   console.error('❌ DB source not found:', dbSrc);
