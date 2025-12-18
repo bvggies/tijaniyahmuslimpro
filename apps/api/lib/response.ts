@@ -30,12 +30,12 @@ export function methodNotAllowed(res: VercelResponse) {
   );
 }
 
-export function serverError(res: VercelResponse, message = 'INTERNAL_SERVER_ERROR') {
-  json(
-    res,
-    500,
-    { error: message } satisfies ApiErrorShape,
-  );
+export function serverError(res: VercelResponse, message = 'INTERNAL_SERVER_ERROR', details?: unknown) {
+  const errorResponse: ApiErrorShape & { details?: unknown } = { error: message };
+  if (details) {
+    errorResponse.details = details;
+  }
+  json(res, 500, errorResponse);
 }
 
 
