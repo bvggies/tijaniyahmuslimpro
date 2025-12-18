@@ -31,26 +31,34 @@ const TIJANIYAH_DUAS = [
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    // Ensure category exists
+    let category = await prisma.duaCategory.findFirst({
+      where: { name: 'Tijaniyah Dua' },
+    });
+    if (!category) {
+      category = await prisma.duaCategory.create({
+        data: { name: 'Tijaniyah Dua' },
+      });
+    }
+
     // Ensure these duas are present in the Dua table (idempotent).
     await Promise.all(
-      TIJANIYAH_DUAS.map(dua =>
-        prisma.dua.upsert({
+      TIJANIYAH_DUAS.map(async (dua) => {
+        const existing = await prisma.dua.findFirst({
           where: { title: dua.title },
-          update: {},
-          create: {
-            title: dua.title,
-            arabic: dua.arabic,
-            translation: dua.translation,
-            reference: 'Tijaniyah',
-            category: {
-              connectOrCreate: {
-                where: { name: 'Tijaniyah Dua' },
-                create: { name: 'Tijaniyah Dua' },
-              },
+        });
+        if (!existing) {
+          await prisma.dua.create({
+            data: {
+              title: dua.title,
+              arabic: dua.arabic,
+              translation: dua.translation,
+              reference: 'Tijaniyah',
+              categoryId: category.id,
             },
-          },
-        }),
-      ),
+          });
+        }
+      }),
     );
 
     const stored = await prisma.dua.findMany({

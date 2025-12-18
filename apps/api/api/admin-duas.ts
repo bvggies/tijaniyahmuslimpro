@@ -36,11 +36,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let categoryId: string | undefined;
     if (categoryName) {
-      const category = await prisma.duaCategory.upsert({
+      let category = await prisma.duaCategory.findFirst({
         where: { name: categoryName },
-        create: { name: categoryName },
-        update: {},
       });
+      if (!category) {
+        category = await prisma.duaCategory.create({
+          data: { name: categoryName },
+        });
+      }
       categoryId = category.id;
     }
 
