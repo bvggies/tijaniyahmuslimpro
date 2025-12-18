@@ -1,40 +1,55 @@
 const fs = require('fs');
 const path = require('path');
 
+const apiDir = path.join(__dirname, '..');
+const rootDir = path.join(apiDir, '../..');
+
+// Ensure node_modules exists
+const nodeModulesDir = path.join(apiDir, 'node_modules');
+if (!fs.existsSync(nodeModulesDir)) {
+  fs.mkdirSync(nodeModulesDir, { recursive: true });
+}
+
 // Copy shared package
-const sharedSrc = path.join(__dirname, '../../../packages/shared/src');
-const sharedDest = path.join(__dirname, '../node_modules/@tmp/shared/src');
+const sharedPackageDir = path.join(nodeModulesDir, '@tmp', 'shared');
+if (!fs.existsSync(sharedPackageDir)) {
+  fs.mkdirSync(sharedPackageDir, { recursive: true });
+}
+
+const sharedSrc = path.join(rootDir, 'packages/shared/src');
+const sharedDest = path.join(sharedPackageDir, 'src');
 if (fs.existsSync(sharedSrc)) {
-  if (!fs.existsSync(path.dirname(sharedDest))) {
-    fs.mkdirSync(path.dirname(sharedDest), { recursive: true });
-  }
   copyRecursiveSync(sharedSrc, sharedDest);
   // Copy package.json
-  fs.copyFileSync(
-    path.join(__dirname, '../../../packages/shared/package.json'),
-    path.join(__dirname, '../node_modules/@tmp/shared/package.json')
-  );
+  const sharedPkgJson = path.join(rootDir, 'packages/shared/package.json');
+  if (fs.existsSync(sharedPkgJson)) {
+    fs.copyFileSync(sharedPkgJson, path.join(sharedPackageDir, 'package.json'));
+  }
+  console.log('✅ Copied @tmp/shared package');
 }
 
 // Copy db package
-const dbSrc = path.join(__dirname, '../../../packages/db/src');
-const dbDest = path.join(__dirname, '../node_modules/@tmp/db/src');
+const dbPackageDir = path.join(nodeModulesDir, '@tmp', 'db');
+if (!fs.existsSync(dbPackageDir)) {
+  fs.mkdirSync(dbPackageDir, { recursive: true });
+}
+
+const dbSrc = path.join(rootDir, 'packages/db/src');
+const dbDest = path.join(dbPackageDir, 'src');
 if (fs.existsSync(dbSrc)) {
-  if (!fs.existsSync(path.dirname(dbDest))) {
-    fs.mkdirSync(path.dirname(dbDest), { recursive: true });
-  }
   copyRecursiveSync(dbSrc, dbDest);
   // Copy package.json
-  fs.copyFileSync(
-    path.join(__dirname, '../../../packages/db/package.json'),
-    path.join(__dirname, '../node_modules/@tmp/db/package.json')
-  );
-  // Copy prisma directory
-  const prismaSrc = path.join(__dirname, '../../../packages/db/prisma');
-  const prismaDest = path.join(__dirname, '../node_modules/@tmp/db/prisma');
+  const dbPkgJson = path.join(rootDir, 'packages/db/package.json');
+  if (fs.existsSync(dbPkgJson)) {
+    fs.copyFileSync(dbPkgJson, path.join(dbPackageDir, 'package.json'));
+  }
+  // Copy prisma directory (needed for generated client)
+  const prismaSrc = path.join(rootDir, 'packages/db/prisma');
+  const prismaDest = path.join(dbPackageDir, 'prisma');
   if (fs.existsSync(prismaSrc)) {
     copyRecursiveSync(prismaSrc, prismaDest);
   }
+  console.log('✅ Copied @tmp/db package');
 }
 
 function copyRecursiveSync(src, dest) {
