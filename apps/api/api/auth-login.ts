@@ -9,7 +9,20 @@ import {
 import { createSession, mapRoleName, signAccessToken } from '../lib/auth';
 import { badRequest, methodNotAllowed, ok, serverError } from '../lib/response';
 
+const ADMIN_ORIGIN = process.env.ADMIN_DASHBOARD_ORIGIN ?? 'https://tijaniyahmuslimpro-admin-fawn.vercel.app';
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Basic CORS for admin dashboard
+  res.setHeader('Access-Control-Allow-Origin', ADMIN_ORIGIN);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Vary', 'Origin');
+
+  if (req.method === 'OPTIONS') {
+    // Preflight request
+    return res.status(204).end();
+  }
+
   if (req.method !== 'POST') return methodNotAllowed(res);
 
   try {
