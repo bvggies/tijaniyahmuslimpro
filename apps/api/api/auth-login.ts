@@ -38,11 +38,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       include: { role: true },
     });
     if (!user) {
+      console.error(`[auth-login] User not found: ${email}`);
       return badRequest(res, apiError('INVALID_CREDENTIALS', 'INVALID_CREDENTIALS'));
     }
 
     const okPassword = await bcrypt.compare(password, user.passwordHash);
     if (!okPassword) {
+      console.error(`[auth-login] Invalid password for user: ${email}`);
       return badRequest(res, apiError('INVALID_CREDENTIALS', 'INVALID_CREDENTIALS'));
     }
 

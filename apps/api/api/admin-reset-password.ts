@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@tmp/db';
+import { apiError } from '@tmp/shared';
 import { badRequest, methodNotAllowed, ok, serverError } from '../lib/response';
 
 /**
@@ -17,11 +18,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Basic protection - require a secret key
     const expectedSecret = process.env.ADMIN_RESET_SECRET || 'CHANGE_THIS_IN_PRODUCTION';
     if (secret !== expectedSecret) {
-      return badRequest(res, { error: 'INVALID_SECRET', message: 'Invalid secret key' });
+      return badRequest(res, apiError('INVALID_SECRET', 'INVALID_SECRET'));
     }
 
     if (!email || !password) {
-      return badRequest(res, { error: 'INVALID_INPUT', message: 'Email and password required' });
+      return badRequest(res, apiError('INVALID_INPUT', 'INVALID_INPUT', 'Email and password required'));
     }
 
     // Find or create the user
@@ -37,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!role) {
-        return serverError(res, { error: 'ROLE_NOT_FOUND', message: 'SUPER_ADMIN role not found' });
+        return serverError(res, 'ROLE_NOT_FOUND', 'SUPER_ADMIN role not found');
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
