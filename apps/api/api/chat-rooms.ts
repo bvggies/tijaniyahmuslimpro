@@ -39,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             orderBy: { createdAt: 'desc' },
             take: 1,
             include: {
-              author: {
+              sender: {
                 select: {
                   id: true,
                   name: true,
@@ -55,14 +55,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       // Transform rooms to include last message and recipient info for DMs
-      const transformedRooms = rooms.map((room) => {
-        const lastMessage = room.messages[0];
-        let roomName = room.name;
+      // Use a loose type here to avoid over-constraining Prisma's generated types in the build
+      const transformedRooms = (rooms as any[]).map((room) => {
+        const lastMessage = room.messages?.[0];
+        let roomName = room.name as string;
         let recipient = null;
 
         // For direct messages, get the recipient info
-        if (!room.isGroup && room.members.length === 2) {
-          const recipientMember = room.members.find((m) => m.userId !== user.id);
+        if (!room.isGroup && room.members?.length === 2) {
+          const recipientMember = room.members.find((m: any) => m.userId !== user.id);
           if (recipientMember?.user) {
             recipient = recipientMember.user;
             roomName = recipient.name || room.name;
@@ -78,7 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ? {
                 content: lastMessage.content,
                 timestamp: lastMessage.createdAt.toISOString(),
-                author: lastMessage.author,
+                author: lastMessage.sender,
               }
             : undefined,
           unreadCount: 0, // TODO: Implement unread count
@@ -133,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           orderBy: { createdAt: 'desc' },
           take: 1,
           include: {
-            author: {
+            sender: {
               select: {
                 id: true,
                 name: true,
@@ -163,13 +164,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Chat room verified in database:', verifyRoom.id);
 
     // Transform to match GET response format
-    const lastMessage = room.messages[0];
+    const lastMessage = (room as any).messages?.[0];
     let roomName = room.name;
     let recipient = null;
 
     // For direct messages, get the recipient info
-    if (!room.isGroup && room.members.length === 2) {
-      const recipientMember = room.members.find((m) => m.userId !== user.id);
+    if (!room.isGroup && (room as any).members?.length === 2) {
+      const recipientMember = (room as any).members.find((m: any) => m.userId !== user.id);
       if (recipientMember?.user) {
         recipient = recipientMember.user;
         roomName = recipient.name || room.name;
@@ -186,7 +187,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ? {
               content: lastMessage.content,
               timestamp: lastMessage.createdAt.toISOString(),
-              author: lastMessage.author,
+              author: lastMessage.sender,
             }
           : undefined,
         unreadCount: 0,
