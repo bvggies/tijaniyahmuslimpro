@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { IslamicBackground } from '@tmp/ui';
 import { useAuth } from '../auth';
 
 export function LoginPage() {
@@ -31,9 +32,8 @@ export function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#062F2A]"
-    >
+    <IslamicBackground>
+      <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#062F2A]/95">
       {/* Animated background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -214,7 +214,8 @@ export function LoginPage() {
         <div className="mt-4 text-center text-[11px] text-white/45">
           © {new Date().getFullYear()} Tijaniyah Muslim Pro · Admin Console
         </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </IslamicBackground>
   );
 }
