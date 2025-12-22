@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "build:vercel": "cd ../.. && npm install && npm run build --workspace=packages/shared --if-present && cd apps/admin && react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "build:vercel": "cd ../.. && npm install && npm run build --workspace=packages/shared --if-present && cd apps/admin && craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "@types/react": "^18.3.11",
