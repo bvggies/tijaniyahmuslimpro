@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, Button } from '@tmp/ui';
 import { useAuth } from '../auth';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 
 interface AppSettingsDto {
   id: string;
@@ -18,7 +18,7 @@ export function SettingsPage() {
   const [faqDraft, setFaqDraft] = useState('');
   const [makkahStreamUrl, setMakkahStreamUrl] = useState('');
 
-  const { data } = useQuery({
+  const { data } = useQuery<{ settings: AppSettingsDto }>({
     queryKey: ['adminAppSettings'],
     queryFn: async () => {
       const res = await fetch(`${API_BASE_URL}/api/admin-app-settings`, {
@@ -28,15 +28,18 @@ export function SettingsPage() {
       return (await res.json()) as { settings: AppSettingsDto };
     },
     enabled: !!accessToken,
-    onSuccess: payload => {
-      if (payload.settings.faqJson && !faqDraft) {
-        setFaqDraft(payload.settings.faqJson);
-      }
-      if (payload.settings.makkahStreamUrl && !makkahStreamUrl) {
-        setMakkahStreamUrl(payload.settings.makkahStreamUrl);
-      }
-    },
   });
+
+  useEffect(() => {
+    if (!data?.settings) return;
+
+    if (data.settings.faqJson && !faqDraft) {
+      setFaqDraft(data.settings.faqJson);
+    }
+    if (data.settings.makkahStreamUrl && !makkahStreamUrl) {
+      setMakkahStreamUrl(data.settings.makkahStreamUrl);
+    }
+  }, [data, faqDraft, makkahStreamUrl]);
 
   const mutation = useMutation({
     mutationFn: async (settings: Partial<AppSettingsDto>) => {
