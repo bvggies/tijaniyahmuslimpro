@@ -36,11 +36,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const fetchMe = async (token: string) => {
-    const res = await fetch(`${API_BASE_URL}/api/auth-me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE_URL}/api/auth-me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (err) {
+      console.error('Admin auth: failed to reach API in fetchMe', err);
+      setUser(null);
+      setAccessToken(null);
+      window.localStorage.removeItem('admin_accessToken');
+      return;
+    }
     if (!res.ok) {
       setUser(null);
       setAccessToken(null);
@@ -52,12 +61,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE_URL}/api/auth-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const json = await res.json();
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE_URL}/api/auth-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (err) {
+      console.error('Admin login: network or CORS error', err);
+      throw new Error(
+        'Unable to reach admin API. Please check your connection or API base URL (REACT_APP_API_BASE_URL).',
+      );
+    }
+
+    let json: any;
+    try {
+      json = await res.json();
+    } catch {
+      // Non-JSON response (e.g. HTML error page)
+      throw new Error('Unexpected response from server while signing in.');
+    }
+
     if (!res.ok) {
       throw new Error(json.error ?? 'Unable to sign in');
     }
