@@ -100,8 +100,9 @@ async function main() {
 
   // Create sample journal entries for admin user (optional)
   console.log('📔 Creating sample journal entries...');
+  const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL || 'superadmin@tijaniyahmuslimpro.com';
   const adminUser = await prisma.user.findUnique({
-    where: { email: adminEmail },
+    where: { email: superAdminEmail },
   });
 
   if (adminUser) {
