@@ -4,6 +4,7 @@ import apiClient from '../services/apiClient';
 export interface Post {
   id: string;
   content: string;
+  imageUrl?: string;
   author: {
     id: string;
     name: string;
@@ -34,6 +35,7 @@ interface ApiPost {
   author: {
     id: string;
     name: string;
+    avatarUrl?: string;
   };
   likeCount: number;
   commentCount: number;
@@ -57,9 +59,11 @@ export const usePosts = () => {
         const transformedPosts: Post[] = response.posts.map((p) => ({
           id: p.id,
           content: p.content,
+          imageUrl: p.imageUrl,
           author: {
             id: p.author?.id || 'unknown',
             name: p.author?.name || 'Anonymous',
+            avatar: p.author?.avatarUrl,
           },
           likes: p.likeCount || 0,
           comments: p.commentCount || 0,
@@ -137,9 +141,11 @@ export const useCreatePost = () => {
           return [data.post, ...old];
         });
         
-        // Don't refetch immediately - let the optimistic update persist
-        // The next natural refetch (on mount, pull-to-refresh, or after 30s) will sync with server
-        // This prevents the post from disappearing due to timing issues
+        // Refetch after a short delay to ensure we have the latest data from the database
+        // This ensures persistence even if the optimistic update gets overwritten
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+        }, 500);
       }
     },
     onError: (error: any) => {

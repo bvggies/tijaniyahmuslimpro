@@ -309,7 +309,15 @@ export const SurahReaderScreen: React.FC = () => {
             </View>
           ) : (
             <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>No ayahs found</Text>
+              <GlassCard style={{ padding: spacing.xl, alignItems: 'center' }}>
+                <Ionicons name="cloud-offline-outline" size={48} color={colors.pineBlue[300]} style={{ marginBottom: spacing.md }} />
+                <Text style={[styles.loadingText, { marginBottom: spacing.sm }]}>
+                  Unable to load surah content
+                </Text>
+                <Text style={[styles.loadingText, { fontSize: 14, color: colors.pineBlue[300] }]}>
+                  Please check your internet connection and try again
+                </Text>
+              </GlassCard>
             </View>
           )}
         </ScrollView>

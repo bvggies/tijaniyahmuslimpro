@@ -56,13 +56,17 @@ export const quranService = {
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        console.warn('Non-JSON response from Quran API:', text.substring(0, 100));
+        if (__DEV__) {
+          console.warn('Non-JSON response from Quran API:', text.substring(0, 100));
+        }
         return this.getFallbackSurahs();
       }
 
       const text = await response.text();
       if (!text || text.trim().length === 0) {
-        console.warn('Empty response from Quran API');
+        if (__DEV__) {
+          console.warn('Empty response from Quran API, using fallback data');
+        }
         return this.getFallbackSurahs();
       }
 
@@ -75,7 +79,9 @@ export const quranService = {
       }
       
       if (!data || !data.data || !Array.isArray(data.data)) {
-        console.warn('Invalid data structure from Quran API:', data);
+        if (__DEV__) {
+          console.warn('Invalid data structure from Quran API:', data);
+        }
         return this.getFallbackSurahs();
       }
       
@@ -102,65 +108,98 @@ export const quranService = {
    */
   async getSurah(surahNumber: number, edition: string = 'quran-uthmani'): Promise<SurahData> {
     try {
-      const response = await fetch(`${QURAN_API_BASE}/surah/${surahNumber}/${edition}`, {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch surah: ${response.status} ${response.statusText}`);
-      }
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      // Check if response is actually JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Non-JSON response: ${text.substring(0, 100)}`);
-      }
-
-      const text = await response.text();
-      if (!text || text.trim().length === 0) {
-        throw new Error('Empty response from Quran API');
-      }
-
-      let data;
       try {
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error('JSON parse error. Response text:', text.substring(0, 200));
-        throw new Error(`Invalid JSON response: ${parseError}`);
+        const response = await fetch(`${QURAN_API_BASE}/surah/${surahNumber}/${edition}`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          if (__DEV__) {
+            console.warn(`Failed to fetch surah ${surahNumber}: ${response.status} ${response.statusText}`);
+          }
+          return this.getFallbackSurah(surahNumber);
+        }
+
+        // Check if response is actually JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          if (__DEV__) {
+            console.warn(`Non-JSON response for surah ${surahNumber}:`, text.substring(0, 100));
+          }
+          return this.getFallbackSurah(surahNumber);
+        }
+
+        const text = await response.text();
+        if (!text || text.trim().length === 0) {
+          if (__DEV__) {
+            console.warn(`Empty response from Quran API for surah ${surahNumber}, using fallback data`);
+          }
+          return this.getFallbackSurah(surahNumber);
+        }
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (parseError) {
+          if (__DEV__) {
+            console.warn('JSON parse error. Response text:', text.substring(0, 200));
+          }
+          return this.getFallbackSurah(surahNumber);
+        }
+        
+        if (!data || !data.data) {
+          if (__DEV__) {
+            console.warn('Invalid data structure from Quran API for surah', surahNumber);
+          }
+          return this.getFallbackSurah(surahNumber);
+        }
+        
+        const surah = data.data;
+        return {
+          number: surah.number,
+          name: surah.name,
+          englishName: surah.englishName,
+          englishNameTranslation: surah.englishNameTranslation,
+          numberOfAyahs: surah.numberOfAyahs,
+          revelationType: surah.revelationType === 'Meccan' ? 'Meccan' : 'Medinan',
+          ayahs: surah.ayahs.map((a: any) => ({
+            number: a.number,
+            text: a.text,
+            numberInSurah: a.numberInSurah,
+            juz: a.juz,
+            manzil: a.manzil,
+            page: a.page,
+            ruku: a.ruku,
+            hizbQuarter: a.hizbQuarter,
+            sajda: a.sajda?.recommended || false,
+          })),
+        };
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          if (__DEV__) {
+            console.warn(`Request timeout for surah ${surahNumber}`);
+          }
+        } else if (__DEV__) {
+          console.warn(`Error fetching surah ${surahNumber}:`, fetchError?.message || fetchError);
+        }
+        return this.getFallbackSurah(surahNumber);
       }
-      
-      if (!data || !data.data) {
-        throw new Error('Invalid data structure from Quran API');
-      }
-      
-      const surah = data.data;
-      return {
-        number: surah.number,
-        name: surah.name,
-        englishName: surah.englishName,
-        englishNameTranslation: surah.englishNameTranslation,
-        numberOfAyahs: surah.numberOfAyahs,
-        revelationType: surah.revelationType === 'Meccan' ? 'Meccan' : 'Medinan',
-        ayahs: surah.ayahs.map((a: any) => ({
-          number: a.number,
-          text: a.text,
-          numberInSurah: a.numberInSurah,
-          juz: a.juz,
-          manzil: a.manzil,
-          page: a.page,
-          ruku: a.ruku,
-          hizbQuarter: a.hizbQuarter,
-          sajda: a.sajda?.recommended || false,
-        })),
-      };
     } catch (error: any) {
       if (__DEV__) {
-        console.error('Error fetching surah:', error?.message || error);
+        console.warn('Unexpected error fetching surah:', error?.message || error);
       }
-      throw error;
+      return this.getFallbackSurah(surahNumber);
     }
   },
 
@@ -237,6 +276,34 @@ export const quranService = {
       { number: 9, name: 'التوبة', englishName: 'At-Tawbah', englishNameTranslation: 'The Repentance', numberOfAyahs: 129, revelationType: 'Medinan' },
       { number: 10, name: 'يونس', englishName: 'Yunus', englishNameTranslation: 'Jonah', numberOfAyahs: 109, revelationType: 'Meccan' },
     ];
+  },
+
+  /**
+   * Fallback surah data if API fails for a specific surah
+   */
+  getFallbackSurah(surahNumber: number): SurahData {
+    // Get basic surah info from fallback list
+    const fallbackSurahs = this.getFallbackSurahs();
+    const surahInfo = fallbackSurahs.find((s) => s.number === surahNumber) || {
+      number: surahNumber,
+      name: `Surah ${surahNumber}`,
+      englishName: `Surah ${surahNumber}`,
+      englishNameTranslation: `Surah ${surahNumber}`,
+      numberOfAyahs: 0,
+      revelationType: 'Meccan' as const,
+    };
+
+    // Return minimal surah data with empty ayahs
+    // The UI should handle this gracefully
+    return {
+      number: surahInfo.number,
+      name: surahInfo.name,
+      englishName: surahInfo.englishName,
+      englishNameTranslation: surahInfo.englishNameTranslation,
+      numberOfAyahs: surahInfo.numberOfAyahs,
+      revelationType: surahInfo.revelationType,
+      ayahs: [], // Empty ayahs - UI should show a message
+    };
   },
 };
 

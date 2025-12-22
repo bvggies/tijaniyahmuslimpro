@@ -59,35 +59,55 @@ export const useSurah = (surahNumber: number) => {
   return useQuery({
     queryKey: ['quran', 'surah', surahNumber],
     queryFn: async () => {
-      const [surahData, translationData] = await Promise.all([
-        quranService.getSurah(surahNumber),
-        quranService.getSurahTranslation(surahNumber).catch(() => ({ ayahs: [] })),
-      ]);
+      try {
+        const [surahData, translationData] = await Promise.all([
+          quranService.getSurah(surahNumber),
+          quranService.getSurahTranslation(surahNumber).catch(() => ({ ayahs: [] })),
+        ]);
 
-      const translationMap = new Map(
-        translationData.ayahs.map((t) => [t.number, t.text]),
-      );
+        const translationMap = new Map(
+          translationData.ayahs.map((t) => [t.number, t.text]),
+        );
 
-      return {
-        surah: {
-          number: surahData.number,
-          name: surahData.name,
-          englishName: surahData.englishName,
-          numberOfAyahs: surahData.numberOfAyahs,
-          revelationType: surahData.revelationType,
-        },
-        ayahs: surahData.ayahs.map((ayah) => ({
-          number: ayah.number,
-          text: ayah.text,
-          translation: translationMap.get(ayah.number),
-          numberInSurah: ayah.numberInSurah,
-          juz: ayah.juz,
-          page: ayah.page,
-          sajda: ayah.sajda,
-        })),
-      };
+        return {
+          surah: {
+            number: surahData.number,
+            name: surahData.name,
+            englishName: surahData.englishName,
+            numberOfAyahs: surahData.numberOfAyahs,
+            revelationType: surahData.revelationType,
+          },
+          ayahs: surahData.ayahs.map((ayah) => ({
+            number: ayah.number,
+            text: ayah.text,
+            translation: translationMap.get(ayah.number),
+            numberInSurah: ayah.numberInSurah,
+            juz: ayah.juz,
+            page: ayah.page,
+            sajda: ayah.sajda,
+          })),
+        };
+      } catch (error: any) {
+        // If there's still an error, return a minimal structure
+        if (__DEV__) {
+          console.warn('Error in useSurah:', error?.message || error);
+        }
+        return {
+          surah: {
+            number: surahNumber,
+            name: `Surah ${surahNumber}`,
+            englishName: `Surah ${surahNumber}`,
+            numberOfAyahs: 0,
+            revelationType: 'Meccan' as const,
+          },
+          ayahs: [],
+        };
+      }
     },
     staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    retry: 2, // Retry up to 2 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    throwOnError: false, // Don't throw errors, return fallback data instead
   });
 };
 

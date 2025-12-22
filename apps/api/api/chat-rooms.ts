@@ -48,7 +48,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
           },
         },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: [
+          { updatedAt: 'desc' },
+          { createdAt: 'desc' },
+        ],
       });
 
       // Transform rooms to include last message and recipient info for DMs
@@ -92,10 +95,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { name, isGroup } = parsed.data;
 
+    console.log('Creating chat room for user:', user.id, 'Name:', name, 'IsGroup:', isGroup ?? true);
+
+    // Test database connection first
+    try {
+      await prisma.$connect();
+      console.log('Database connection verified');
+    } catch (connError) {
+      console.error('Database connection error:', connError);
+      return serverError(res, 'DATABASE_CONNECTION_ERROR', (connError as Error).message);
+    }
+
     const room = await prisma.chatRoom.create({
       data: {
         name,
-        isGroup,
+        isGroup: isGroup ?? true,
         members: {
           create: {
             userId: user.id,
@@ -130,6 +144,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     });
 
+    console.log('Chat room created successfully:', room.id);
+
+    // Ensure the database write is committed by doing a separate query
+    // This helps ensure the data is persisted, especially in serverless environments
+    await prisma.$executeRaw`SELECT 1`;
+
+    // Verify the room was actually saved
+    const verifyRoom = await prisma.chatRoom.findUnique({
+      where: { id: room.id },
+    });
+
+    if (!verifyRoom) {
+      console.error('Chat room was not saved to database! Room ID:', room.id);
+      return serverError(res, 'ROOM_CREATION_FAILED', 'Room was created but not found in database');
+    }
+
+    console.log('Chat room verified in database:', verifyRoom.id);
+
     // Transform to match GET response format
     const lastMessage = room.messages[0];
     let roomName = room.name;
@@ -161,11 +193,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     });
   } catch (error) {
-    console.error('chat-rooms error', error);
+    console.error('chat-rooms error:', error);
+    console.error('Error details:', {
+      message: (error as Error).message,
+      stack: (error as Error).stack,
+      name: (error as Error).name,
+    });
     if ((error as Error).message === 'UNAUTHORIZED') {
       return badRequest(res, apiError('UNAUTHORIZED', 'UNAUTHORIZED'));
     }
-    serverError(res);
+    serverError(res, 'INTERNAL_SERVER_ERROR', (error as Error).message);
   }
 }
 

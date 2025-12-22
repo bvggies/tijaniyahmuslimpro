@@ -13,8 +13,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { isHidden: false },
       orderBy: { createdAt: 'desc' },
       include: {
-        author: true,
-        likes: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+          },
+        },
+        likes: viewer ? {
+          where: {
+            userId: viewer.id,
+          },
+        } : false,
         _count: { select: { comments: true, likes: true } },
       },
       take: 50,
@@ -24,15 +34,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       posts: posts.map((p: typeof posts[0]) => ({
         id: p.id,
         content: p.content,
-        imageUrl: p.imageUrl,
-        createdAt: p.createdAt,
+        imageUrl: p.imageUrl || undefined,
+        createdAt: p.createdAt.toISOString(),
         author: {
           id: p.author.id,
-          name: p.author.name,
+          name: p.author.name || 'Anonymous',
+          avatarUrl: p.author.avatarUrl || undefined,
         },
         likeCount: p._count.likes,
         commentCount: p._count.comments,
-        likedByViewer: viewer ? p.likes.some((l: typeof p.likes[0]) => l.userId === viewer.id) : false,
+        likedByViewer: viewer && Array.isArray(p.likes) ? p.likes.some((l: typeof p.likes[0]) => l.userId === viewer.id) : false,
       })),
     });
   } catch (error) {

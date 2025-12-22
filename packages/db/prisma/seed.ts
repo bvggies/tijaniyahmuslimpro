@@ -34,40 +34,68 @@ async function main() {
     console.log('  ✓ App settings already exist');
   }
 
-  // Create initial SUPER_ADMIN user (if not exists)
-  console.log('👤 Creating initial admin user...');
-  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@tijaniyahmuslimpro.com';
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin123!@#';
+  // Create admin users with different roles
+  console.log('👤 Creating admin users...');
+  
+  const adminUsers = [
+    {
+      email: process.env.SEED_SUPER_ADMIN_EMAIL || 'superadmin@tijaniyahmuslimpro.com',
+      password: process.env.SEED_SUPER_ADMIN_PASSWORD || 'SuperAdmin123!@#',
+      name: 'Super Administrator',
+      role: 'SUPER_ADMIN',
+    },
+    {
+      email: process.env.SEED_ADMIN_EMAIL || 'admin@tijaniyahmuslimpro.com',
+      password: process.env.SEED_ADMIN_PASSWORD || 'Admin123!@#',
+      name: 'Administrator',
+      role: 'ADMIN',
+    },
+    {
+      email: process.env.SEED_MODERATOR_EMAIL || 'moderator@tijaniyahmuslimpro.com',
+      password: process.env.SEED_MODERATOR_PASSWORD || 'Moderator123!@#',
+      name: 'Content Moderator',
+      role: 'MODERATOR',
+    },
+    {
+      email: process.env.SEED_CONTENT_MANAGER_EMAIL || 'content@tijaniyahmuslimpro.com',
+      password: process.env.SEED_CONTENT_MANAGER_PASSWORD || 'Content123!@#',
+      name: 'Content Manager',
+      role: 'CONTENT_MANAGER',
+    },
+  ];
 
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: adminEmail },
-  });
-
-  if (existingAdmin) {
-    console.log(`  ✓ Admin user already exists: ${adminEmail}`);
-  } else {
-    const superAdminRole = await prisma.role.findUnique({
-      where: { name: 'SUPER_ADMIN' },
+  for (const adminUser of adminUsers) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: adminUser.email },
     });
 
-    if (!superAdminRole) {
-      throw new Error('SUPER_ADMIN role not found');
+    if (existingUser) {
+      console.log(`  ✓ ${adminUser.role} user already exists: ${adminUser.email}`);
+    } else {
+      const role = await prisma.role.findUnique({
+        where: { name: adminUser.role },
+      });
+
+      if (!role) {
+        console.error(`  ❌ Role "${adminUser.role}" not found, skipping user creation`);
+        continue;
+      }
+
+      const passwordHash = await bcrypt.hash(adminUser.password, 12);
+
+      await prisma.user.create({
+        data: {
+          email: adminUser.email,
+          passwordHash,
+          name: adminUser.name,
+          roleId: role.id,
+        },
+      });
+
+      console.log(`  ✓ ${adminUser.role} user created: ${adminUser.email}`);
+      console.log(`     Password: ${adminUser.password}`);
+      console.log(`     ⚠️  Please change this password after first login!`);
     }
-
-    const passwordHash = await bcrypt.hash(adminPassword, 12);
-
-    await prisma.user.create({
-      data: {
-        email: adminEmail,
-        passwordHash,
-        name: 'Super Admin',
-        roleId: superAdminRole.id,
-      },
-    });
-
-    console.log(`  ✓ Admin user created: ${adminEmail}`);
-    console.log(`  ⚠️  Default password: ${adminPassword}`);
-    console.log(`  ⚠️  Please change this password after first login!`);
   }
 
   // Create sample journal entries for admin user (optional)

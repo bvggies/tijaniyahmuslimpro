@@ -24,7 +24,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const messages = await prisma.message.findMany({
         where: { roomId },
-        include: { sender: true },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
         orderBy: { createdAt: 'asc' },
         take: 200,
       });
@@ -33,9 +41,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         messages: messages.map((m: typeof messages[0]) => ({
           id: m.id,
           content: m.content,
-          createdAt: m.createdAt,
-          sender: { id: m.sender.id, name: m.sender.name },
-          isMine: m.senderId === user.id,
+          timestamp: m.createdAt.toISOString(),
+          author: {
+            id: m.sender.id,
+            name: m.sender.name || 'Anonymous',
+            avatar: m.sender.avatarUrl || undefined,
+          },
         })),
       });
     }
@@ -55,15 +66,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return badRequest(res, apiError('FORBIDDEN', 'FORBIDDEN'));
     }
 
-    const message = await prisma.message.create({
-      data: {
-        roomId,
-        senderId: user.id,
-        content,
+    // Create message and update room's updatedAt in a transaction
+    const [message] = await prisma.$transaction([
+      prisma.message.create({
+        data: {
+          roomId,
+          senderId: user.id,
+          content,
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      }),
+      prisma.chatRoom.update({
+        where: { id: roomId },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+
+    ok(res, {
+      message: {
+        id: message.id,
+        content: message.content,
+        timestamp: message.createdAt.toISOString(),
+        author: {
+          id: message.sender.id,
+          name: message.sender.name || 'Anonymous',
+        },
       },
     });
-
-    ok(res, { message });
   } catch (error) {
     console.error('chat-messages error', error);
     if ((error as Error).message === 'UNAUTHORIZED') {

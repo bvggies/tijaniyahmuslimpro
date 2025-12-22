@@ -56,9 +56,11 @@ export const ChatRoomsScreen: React.FC = () => {
           return [data.room, ...old];
         });
         
-        // Don't refetch immediately - let the optimistic update persist
-        // The next natural refetch (on mount, pull-to-refresh, or when app comes to foreground) will sync with server
-        // This prevents the room from disappearing due to timing issues
+        // Refetch after a short delay to ensure we have the latest data from the database
+        // This ensures persistence even if the optimistic update gets overwritten
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['chat', 'rooms'] });
+        }, 500);
       }
     },
     onError: (error) => {
