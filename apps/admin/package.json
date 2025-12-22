@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.59.0",
-    "@tmp/ui": "1.0.0",
     "@tmp/shared": "1.0.0",
+    "@tmp/ui": "1.0.0",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.562.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
@@ -22,11 +24,11 @@
   },
   "devDependencies": {
     "@craco/craco": "^7.1.0",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.2",
     "@types/react-router-dom": "^5.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15"
   },
   "browserslist": {
