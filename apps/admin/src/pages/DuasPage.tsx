@@ -140,22 +140,4 @@ export function DuasPage() {
   );
 }
 
-import { Card, Button } from '@tmp/ui';
-
-export function DuasPage() {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-emerald-50">Duas</h1>
-        <Button>Add dua</Button>
-      </div>
-      <Card className="px-4 py-3">
-        <div className="text-xs text-emerald-100/80 mb-2">
-          CRUD for dua categories and entries using the `Dua` and `DuaCategory` models.
-        </div>
-      </Card>
-    </div>
-  );
-}
-
 

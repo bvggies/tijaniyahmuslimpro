@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(token);
       void fetchMe(token);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Only run on mount - fetchMe is stable and doesn't need to be in deps
   }, []);
 
   const fetchMe = async (token: string) => {
