@@ -70,6 +70,75 @@ async function main() {
     console.log(`  ⚠️  Please change this password after first login!`);
   }
 
+  // Create sample journal entries for admin user (optional)
+  console.log('📔 Creating sample journal entries...');
+  const adminUser = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (adminUser) {
+    const existingEntries = await prisma.journalEntry.count({
+      where: { userId: adminUser.id },
+    });
+
+    if (existingEntries === 0) {
+      const sampleEntries = [
+        {
+          title: 'Gratitude for Today',
+          content: 'Alhamdulillah for another day of blessings. Today I am grateful for the opportunity to learn and grow in my faith. May Allah continue to guide me on the straight path.',
+          tags: ['gratitude', 'reflection', 'daily'],
+          mood: 'grateful',
+          category: 'gratitude',
+          isPinned: true,
+        },
+        {
+          title: 'Reflection on Patience',
+          content: 'Today I learned the importance of patience (sabr) in Islam. The Prophet (SAW) said: "Patience is a light." I will strive to practice patience in all aspects of my life.',
+          tags: ['patience', 'hadith', 'character'],
+          mood: 'reflective',
+          category: 'lesson',
+          isPinned: false,
+        },
+        {
+          title: 'Duʿā for Guidance',
+          content: 'O Allah, guide me to the best of actions and the best of manners. None can guide to the best of them except You, and none can avert the worst of them except You.',
+          tags: ['dua', 'guidance', 'prayer'],
+          mood: 'prayerful',
+          category: 'dua',
+          isPinned: false,
+        },
+        {
+          title: 'Goal: Daily Dhikr',
+          content: 'My goal this week is to increase my daily dhikr. I will set aside time after each prayer to remember Allah and seek His forgiveness.',
+          tags: ['goal', 'dhikr', 'worship'],
+          mood: 'hopeful',
+          category: 'goal',
+          isPinned: false,
+        },
+        {
+          title: 'Peace in Prayer',
+          content: 'There is something so peaceful about standing in prayer, knowing that I am directly communicating with my Creator. This is where I find my greatest peace.',
+          tags: ['prayer', 'peace', 'spirituality'],
+          mood: 'peaceful',
+          category: 'reflection',
+          isPinned: true,
+        },
+      ];
+
+      for (const entry of sampleEntries) {
+        await prisma.journalEntry.create({
+          data: {
+            ...entry,
+            userId: adminUser.id,
+          },
+        });
+      }
+      console.log(`  ✓ Created ${sampleEntries.length} sample journal entries`);
+    } else {
+      console.log(`  ✓ Journal entries already exist (${existingEntries} entries)`);
+    }
+  }
+
   console.log('✅ Database seed completed successfully!');
 }
 

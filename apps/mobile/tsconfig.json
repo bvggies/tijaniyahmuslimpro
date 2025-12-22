@@ -1,9 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["nativewind/types"]
+    "types": [
+      "nativewind/types"
+    ]
   },
-  "include": ["app", "index.ts", "expo-env.d.ts"]
+  "include": [
+    "app",
+    "index.ts"
+  ]
 }
-
-

@@ -11,7 +11,7 @@ export function OnboardingScreen({ navigation }: Props) {
       <View className="flex-1 justify-center px-8">
         <View className="items-center mb-10">
           <Image
-            source={require('../../../assets/logo.png')}
+            source={require('../../assets/logo.png')}
             className="h-24 w-24 mb-6"
           />
           <Text className="text-3xl font-semibold text-white mb-2 text-center">

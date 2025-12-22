@@ -29,9 +29,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         imageUrl,
         authorId: user.id,
       },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            comments: true,
+            likes: true,
+          },
+        },
+        likes: {
+          where: {
+            userId: user.id,
+          },
+        },
+      },
     });
 
-    ok(res, { post });
+    // Transform to match frontend format
+    ok(res, {
+      post: {
+        id: post.id,
+        content: post.content,
+        author: {
+          id: post.author.id,
+          name: post.author.name || 'Anonymous',
+        },
+        likes: post._count.likes,
+        comments: post._count.comments,
+        isLiked: post.likes.length > 0,
+        createdAt: post.createdAt.toISOString(),
+      },
+    });
   } catch (error) {
     console.error('community-post error', error);
     if ((error as Error).message === 'UNAUTHORIZED') {

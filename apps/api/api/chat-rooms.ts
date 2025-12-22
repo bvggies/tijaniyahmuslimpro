@@ -24,11 +24,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
         },
         include: {
-          members: true,
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          messages: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { updatedAt: 'desc' },
       });
-      return ok(res, { rooms });
+
+      // Transform rooms to include last message and recipient info for DMs
+      const transformedRooms = rooms.map((room) => {
+        const lastMessage = room.messages[0];
+        let roomName = room.name;
+        let recipient = null;
+
+        // For direct messages, get the recipient info
+        if (!room.isGroup && room.members.length === 2) {
+          const recipientMember = room.members.find((m) => m.userId !== user.id);
+          if (recipientMember?.user) {
+            recipient = recipientMember.user;
+            roomName = recipient.name || room.name;
+          }
+        }
+
+        return {
+          id: room.id,
+          name: roomName,
+          isGroup: room.isGroup,
+          recipient: recipient,
+          lastMessage: lastMessage
+            ? {
+                content: lastMessage.content,
+                timestamp: lastMessage.createdAt.toISOString(),
+                author: lastMessage.author,
+              }
+            : undefined,
+          unreadCount: 0, // TODO: Implement unread count
+        };
+      });
+
+      return ok(res, { rooms: transformedRooms });
     }
 
     const parsed = createSchema.safeParse(req.body);
@@ -49,9 +103,63 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
         },
       },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    ok(res, { room });
+    // Transform to match GET response format
+    const lastMessage = room.messages[0];
+    let roomName = room.name;
+    let recipient = null;
+
+    // For direct messages, get the recipient info
+    if (!room.isGroup && room.members.length === 2) {
+      const recipientMember = room.members.find((m) => m.userId !== user.id);
+      if (recipientMember?.user) {
+        recipient = recipientMember.user;
+        roomName = recipient.name || room.name;
+      }
+    }
+
+    ok(res, {
+      room: {
+        id: room.id,
+        name: roomName,
+        isGroup: room.isGroup,
+        recipient: recipient,
+        lastMessage: lastMessage
+          ? {
+              content: lastMessage.content,
+              timestamp: lastMessage.createdAt.toISOString(),
+              author: lastMessage.author,
+            }
+          : undefined,
+        unreadCount: 0,
+      },
+    });
   } catch (error) {
     console.error('chat-rooms error', error);
     if ((error as Error).message === 'UNAUTHORIZED') {

@@ -14,16 +14,42 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Tijaniyah Muslim Pro to use your location to calculate accurate prayer times and find nearby mosques."
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tijaniyah.muslimpro"
+      "bundleIdentifier": "com.tijaniyah.muslimpro",
+      "config": {
+        "googleMapsApiKey": "AIzaSyA-EkdViv4FJ0rRkg5yxMVL9eyiigsrTec"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We need your location to show Qibla direction and map.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location to send you prayer time notifications."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "../../assets/AppIcons/playstore.png",
         "backgroundColor": "#061c1e"
       },
-      "package": "com.tijaniyah.muslimpro"
+      "package": "com.tijaniyah.muslimpro",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA-EkdViv4FJ0rRkg5yxMVL9eyiigsrTec"
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
     },
     "extra": {
       "eas": {
@@ -33,5 +59,3 @@
     }
   }
 }
-
-

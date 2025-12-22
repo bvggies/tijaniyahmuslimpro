@@ -12,11 +12,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     ok(res, {
-      campaigns,
+      campaigns: campaigns || [],
     });
   } catch (error) {
     console.error('campaigns error', error);
-    serverError(res);
+    serverError(res, `Failed to fetch campaigns: ${(error as Error).message}`);
   }
 }
 

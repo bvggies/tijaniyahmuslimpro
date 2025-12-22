@@ -8,30 +8,32 @@ datasource db {
 }
 
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
-  passwordHash   String
-  name           String?
-  avatarUrl      String?
-  role           Role            @relation(fields: [roleId], references: [id])
-  roleId         String
-  sessions       Session[]
-  prayerSettings PrayerSettings?
-  bookmarks      QuranBookmark[]
-  tasbihSessions TasbihSession[]
-  wazifas        Wazifa[]
-  lazims         Lazim[]
-  journalEntries JournalEntry[]
-  posts          Post[]
-  comments       Comment[]
-  likes          Like[]
-  chatRooms      ChatRoomMember[]
-  messages       Message[]
-  donations      Donation[]
-  tickets        SupportTicket[]
-  auditLogs      AuditLog[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String
+  name              String?
+  avatarUrl         String?
+  role              Role               @relation(fields: [roleId], references: [id])
+  roleId            String
+  sessions          Session[]
+  prayerSettings    PrayerSettings?
+  bookmarks         QuranBookmark[]
+  tasbihSessions    TasbihSession[]
+  wazifas           Wazifa[]
+  lazims            Lazim[]
+  journalEntries    JournalEntry[]
+  posts             Post[]
+  comments          Comment[]
+  likes             Like[]
+  chatRooms         ChatRoomMember[]
+  messages          Message[]
+  donations         Donation[]
+  tickets           SupportTicket[]
+  auditLogs         AuditLog[]
+  notificationUsers NotificationUser[]
+  groupMemberships  UserGroupMember[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model Role {
@@ -62,9 +64,9 @@ model PrayerSettings {
 }
 
 model DuaCategory {
-  id    String @id @default(cuid())
-  name  String
-  duas  Dua[]
+  id   String @id @default(cuid())
+  name String
+  duas Dua[]
 }
 
 model Dua {
@@ -139,29 +141,38 @@ model JournalEntry {
   userId    String
   title     String
   content   String
+  tags      String[] // Array of tags for categorization
+  mood      String? // Optional mood/emotion (e.g., "grateful", "reflective", "prayerful")
+  category  String? // Optional category (e.g., "reflection", "dua", "lesson", "gratitude")
+  isPinned  Boolean  @default(false) // Allow users to pin important entries
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, isPinned])
 }
 
 model Scholar {
-  id          String           @id @default(cuid())
-  name        String
-  bio         String
-  avatarUrl   String?
-  contents    ScholarContent[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id        String           @id @default(cuid())
+  name      String
+  bio       String
+  avatarUrl String?
+  contents  ScholarContent[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 }
 
 model ScholarContent {
-  id         String   @id @default(cuid())
-  scholar    Scholar  @relation(fields: [scholarId], references: [id])
-  scholarId  String
-  title      String
-  body       String
-  mediaUrl   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(cuid())
+  scholar         Scholar  @relation(fields: [scholarId], references: [id])
+  scholarId       String
+  title           String
+  body            String
+  mediaUrl        String?
+  backgroundColor String?  @default("#105056")
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Post {
@@ -220,35 +231,35 @@ model ChatRoomMember {
 }
 
 model Message {
-  id        String    @id @default(cuid())
-  room      ChatRoom  @relation(fields: [roomId], references: [id])
+  id        String   @id @default(cuid())
+  room      ChatRoom @relation(fields: [roomId], references: [id])
   roomId    String
-  sender    User      @relation(fields: [senderId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
   senderId  String
   content   String
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Campaign {
-  id          String      @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
   description String
   goalAmount  Int?
-  isActive    Boolean     @default(true)
+  isActive    Boolean    @default(true)
   donations   Donation[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Donation {
-  id          String    @id @default(cuid())
-  user        User?     @relation(fields: [userId], references: [id])
-  userId      String?
-  campaign    Campaign  @relation(fields: [campaignId], references: [id])
-  campaignId  String
-  amount      Int
-  receiptUrl  String?
-  createdAt   DateTime  @default(now())
+  id         String   @id @default(cuid())
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     String?
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  campaignId String
+  amount     Int
+  receiptUrl String?
+  createdAt  DateTime @default(now())
 }
 
 model SupportTicket {
@@ -285,12 +296,12 @@ model ContactSubmission {
 }
 
 model AppSettings {
-  id                    String   @id @default(cuid())
-  maintenanceMode       Boolean  @default(false)
-  faqJson               String?  // JSON string for FAQs
-  makkahStreamUrl       String?  // Makkah live stream URL
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id              String   @id @default(cuid())
+  maintenanceMode Boolean  @default(false)
+  faqJson         String? // JSON string for FAQs
+  makkahStreamUrl String? // Makkah live stream URL
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model AuditLog {
@@ -302,4 +313,71 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  location    String?
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
 
+model MakkahStream {
+  id           String   @id @default(cuid())
+  title        String
+  subtitle     String
+  url          String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  title       String
+  message     String
+  type        String             @default("info") // info, warning, success, error
+  targetType  String // "all", "group", "individual"
+  targetUsers NotificationUser[]
+  isRead      Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model NotificationUser {
+  id             String       @id @default(cuid())
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  notificationId String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  isRead         Boolean      @default(false)
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@unique([notificationId, userId])
+}
+
+model UserGroup {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  description String?
+  users       UserGroupMember[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model UserGroupMember {
+  id        String    @id @default(cuid())
+  group     UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime  @default(now())
+
+  @@unique([groupId, userId])
+}

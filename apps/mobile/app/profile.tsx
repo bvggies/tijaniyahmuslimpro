@@ -1,16 +1,13 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { useNavigation } from '@react-navigation/native';
 
 export function ProfileScreen() {
-  const navigation = useNavigation();
-
   const handleLogout = async () => {
     await SecureStore.deleteItemAsync('accessToken');
     await SecureStore.deleteItemAsync('refreshToken');
-    // simple approach: reload navigation state by navigating to root auth flow
-    // @ts-expect-error - we know root has AuthStack
-    navigation.reset({ index: 0, routes: [{ name: 'AuthStack' }] });
+    await SecureStore.deleteItemAsync('guestMode');
+    // RootNavigator listens to auth changes and will swap to AuthStack automatically.
+    // No need to reset navigation here; this avoids dev warnings about unhandled RESET actions.
   };
 
   return (

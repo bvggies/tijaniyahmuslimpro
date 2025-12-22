@@ -4,6 +4,8 @@ import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/UsersPage';
 import { ScholarsPage } from './pages/ScholarsPage';
 import { DuasPage } from './pages/DuasPage';
+import { EventsPage } from './pages/EventsPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import { CommunityModerationPage } from './pages/CommunityModerationPage';
 import { ChatModerationPage } from './pages/ChatModerationPage';
 import { DonationsPage } from './pages/DonationsPage';
@@ -11,6 +13,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { SupportTicketsPage } from './pages/SupportTicketsPage';
 import { ReleaseNotesPage } from './pages/ReleaseNotesPage';
 import { WaitlistPage } from './pages/WaitlistPage';
+import { MakkahStreamsPage } from './pages/MakkahStreamsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RequireAuth, RequireRole, useAuth } from './auth';
 
@@ -28,6 +31,8 @@ function Shell({ children }: { children: React.ReactNode }) {
             <NavLink to="/dashboard">Dashboard</NavLink>
             <NavLink to="/users">Users</NavLink>
             <NavLink to="/scholars">Scholars</NavLink>
+            <NavLink to="/events">Events</NavLink>
+            <NavLink to="/notifications">Notifications</NavLink>
             <NavLink to="/duas">Duas</NavLink>
             <NavLink to="/community">Community moderation</NavLink>
             <NavLink to="/chat">Chat moderation</NavLink>
@@ -35,6 +40,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <NavLink to="/support">Support tickets</NavLink>
             <NavLink to="/release-notes">Release notes</NavLink>
             <NavLink to="/waitlist">Waitlist & contacts</NavLink>
+            <NavLink to="/makkah-streams">Makkah Streams</NavLink>
             <NavLink to="/settings">App settings</NavLink>
           </nav>
         </aside>
@@ -104,6 +110,22 @@ export default function App() {
                   }
                 />
                 <Route
+                  path="/events"
+                  element={
+                    <RequireRole roles={['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER']}>
+                      <EventsPage />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/notifications"
+                  element={
+                    <RequireRole roles={['SUPER_ADMIN', 'ADMIN']}>
+                      <NotificationsPage />
+                    </RequireRole>
+                  }
+                />
+                <Route
                   path="/duas"
                   element={
                     <RequireRole roles={['SUPER_ADMIN', 'CONTENT_MANAGER']}>
@@ -156,6 +178,14 @@ export default function App() {
                   element={
                     <RequireRole roles={['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER']}>
                       <WaitlistPage />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/makkah-streams"
+                  element={
+                    <RequireRole roles={['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER']}>
+                      <MakkahStreamsPage />
                     </RequireRole>
                   }
                 />
