@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:vercel",
   "outputDirectory": "build",
-  "installCommand": "npm install",
+  "installCommand": "cd ../.. && npm install",
   "rewrites": [
     {
       "source": "/(.*)",

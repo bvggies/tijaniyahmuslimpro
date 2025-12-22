@@ -5,6 +5,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:vercel": "cd ../.. && npm install && npm run build --workspace=packages/shared --if-present && cd apps/admin && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
