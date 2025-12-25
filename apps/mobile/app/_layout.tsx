@@ -9,6 +9,8 @@ import { JournalScreen } from './screens/JournalScreen';
 import { MosqueLocatorScreen } from './screens/MosqueLocatorScreen';
 import { ChatRoomsScreen } from './screens/ChatRoomsScreen';
 import { ChatRoomScreen } from './screens/ChatRoomScreen';
+import { UserSearchScreen } from '../src/screens/chat/UserSearchScreen';
+import { PostDetailsScreen } from '../src/screens/community/PostDetailsScreen';
 import { TijaniyahDuasScreen } from './screens/TijaniyahDuasScreen';
 import { WazifaLazimScreen } from './screens/WazifaLazimScreen';
 import { ScholarsScreen } from './screens/ScholarsScreen';
@@ -136,10 +138,10 @@ function RootNavigator() {
         <RootStack.Screen name="Donate" component={DonateScreen} />
         <RootStack.Screen name="Journal" component={JournalScreen} />
         <RootStack.Screen name="Mosques" component={MosqueLocatorScreen} />
-        <RootStack.Screen name="ChatRooms" component={require('../src/screens/chat/ChatRoomsScreen').ChatRoomsScreen} />
-        <RootStack.Screen name="ChatRoom" component={require('../src/screens/chat/ChatRoomScreen').ChatRoomScreen} />
-        <RootStack.Screen name="UserSearch" component={require('../src/screens/chat/UserSearchScreen').UserSearchScreen} />
-        <RootStack.Screen name="PostDetails" component={require('../src/screens/community/PostDetailsScreen').PostDetailsScreen} />
+        <RootStack.Screen name="ChatRooms" component={ChatRoomsScreen} />
+        <RootStack.Screen name="ChatRoom" component={ChatRoomScreen} />
+        <RootStack.Screen name="UserSearch" component={UserSearchScreen} />
+        <RootStack.Screen name="PostDetails" component={PostDetailsScreen} />
         <RootStack.Screen name="TijaniyahDuas" component={TijaniyahDuasScreen} />
         <RootStack.Screen name="WazifaLazim" component={WazifaLazimScreen} />
         <RootStack.Screen name="Tasbih" component={TasbihScreen} />

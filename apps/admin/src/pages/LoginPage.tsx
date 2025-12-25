@@ -1,8 +1,63 @@
 import { FormEvent, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { 
+  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  LogIn, 
+  ArrowRight,
+  Shield,
+  User,
+  Wrench,
+  Settings,
+  Smile,
+  Home
+} from 'lucide-react';
 import { IslamicBackground } from '@tmp/ui';
 import { useAuth } from '../auth';
+
+type DemoRole = 'admin' | 'manager' | 'cleaner' | 'maintenance' | 'guest';
+
+interface RoleOption {
+  id: DemoRole;
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+const roleOptions: RoleOption[] = [
+  { 
+    id: 'admin', 
+    label: 'Admin', 
+    icon: <Shield className="w-5 h-5" />,
+    color: 'from-[#0A3D35] to-[#18F59B]'
+  },
+  { 
+    id: 'manager', 
+    label: 'Manager', 
+    icon: <User className="w-5 h-5" />,
+    color: 'from-[#0A3D35] to-[#0E5146]'
+  },
+  { 
+    id: 'cleaner', 
+    label: 'Cleaner', 
+    icon: <Wrench className="w-5 h-5" />,
+    color: 'from-[#0A3D35] to-[#0E5146]'
+  },
+  { 
+    id: 'maintenance', 
+    label: 'Maintenance', 
+    icon: <Settings className="w-5 h-5" />,
+    color: 'from-[#0A3D35] to-[#0E5146]'
+  },
+  { 
+    id: 'guest', 
+    label: 'Guest', 
+    icon: <Smile className="w-5 h-5" />,
+    color: 'from-[#0A3D35] to-[#0E5146]'
+  },
+];
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -11,6 +66,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<DemoRole>('admin');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,9 +89,88 @@ export function LoginPage() {
 
   return (
     <IslamicBackground>
-      <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-[#062F2A]/95">
-      {/* Animated background glow */}
+      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+        {/* Animated Islamic geometric patterns */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating geometric shapes */}
+          <motion.div
+            className="absolute top-20 left-10 w-32 h-32 opacity-10"
+            animate={{
+              rotate: [0, 360],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <polygon
+                points="50,10 90,90 10,90"
+                fill="none"
+                stroke="#18F59B"
+                strokeWidth="1"
+                opacity="0.3"
+              />
+              <circle cx="50" cy="50" r="30" fill="none" stroke="#18F59B" strokeWidth="1" opacity="0.2" />
+            </svg>
+          </motion.div>
+
+          <motion.div
+            className="absolute bottom-32 right-16 w-24 h-24 opacity-10"
+            animate={{
+              rotate: [360, 0],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <polygon
+                points="50,5 95,50 50,95 5,50"
+                fill="none"
+                stroke="#0A3D35"
+                strokeWidth="1"
+                opacity="0.4"
+              />
+              <polygon
+                points="50,20 80,50 50,80 20,50"
+                fill="none"
+                stroke="#18F59B"
+                strokeWidth="1"
+                opacity="0.2"
+              />
+            </svg>
+          </motion.div>
+
+          <motion.div
+            className="absolute top-1/2 left-1/4 w-16 h-16 opacity-8"
+            animate={{
+              rotate: [0, -360],
+              y: [0, -20, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path
+                d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
+                fill="none"
+                stroke="#18F59B"
+                strokeWidth="1"
+                opacity="0.25"
+              />
+            </svg>
+          </motion.div>
+
+          {/* Animated background glow effects */}
         <motion.div
           className="absolute -top-24 -left-16 w-80 h-80 rounded-full bg-[#18F59B]/12 blur-3xl"
           animate={{ y: [0, -20, 0], x: [0, 15, 0] }}
@@ -48,129 +183,228 @@ export function LoginPage() {
         />
       </div>
 
-      {/* Main card */}
-      <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="relative z-10 w-full max-w-[420px]"
-      >
-        <div className="rounded-3xl bg-white/10 backdrop-blur-2xl border border-white/15 shadow-[0_25px_80px_rgba(0,0,0,0.65)] overflow-hidden">
-          {/* Header strip */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#18F59B]/80 via-[#0A3D35] to-[#18F59B]/60" />
+        {/* Main container - two column layout */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 w-full max-w-6xl mx-auto"
+        >
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+            <div className="grid md:grid-cols-2 min-h-[600px]">
+              {/* Left Section - Promotional Content */}
+              <div className="bg-gradient-to-br from-[#0A3D35] via-[#0E5146] to-[#062F2A] p-12 flex flex-col justify-between relative overflow-hidden">
+                {/* Islamic pattern overlay */}
+                <div className="absolute inset-0 opacity-5">
+                  <svg className="w-full h-full" viewBox="0 0 400 400">
+                    <defs>
+                      <pattern id="islamic-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                        <path
+                          d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
+                          fill="none"
+                          stroke="#18F59B"
+                          strokeWidth="0.5"
+                        />
+                        <circle cx="50" cy="50" r="20" fill="none" stroke="#18F59B" strokeWidth="0.5" />
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#islamic-pattern)" />
+                  </svg>
+                </div>
 
-          <div className="px-8 pt-8 pb-9">
-            {/* Brand / Logo */}
-            <div className="flex items-center justify-center mb-6">
+                <div className="relative z-10">
+                  {/* Branding */}
+      <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-3 mb-12"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#18F59B] to-[#0A3D35] flex items-center justify-center shadow-lg">
+                      <Home className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-white">Tijaniyah</div>
+                      <div className="text-sm text-white/70">Muslim Pro</div>
+                    </div>
+                  </motion.div>
+
+                  {/* Headline */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#18F59B]/16 via-[#0A3D35]/70 to-[#042822] border border-white/20 shadow-[0_18px_45px_rgba(0,0,0,0.85)] flex items-center justify-center"
-              >
-                <Lock className="w-8 h-8 text-[#18F59B]" />
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="mb-8"
+                  >
+                    <h1 className="text-4xl font-bold text-white mb-4 leading-tight">
+                      Elevate Your{' '}
+                      <span className="text-[#18F59B]">Admin Experience</span>
+                    </h1>
+                    <p className="text-white/80 text-lg leading-relaxed">
+                      Streamline operations, manage users, and maximize engagement with Tijaniyah Muslim Pro's comprehensive admin dashboard.
+                    </p>
               </motion.div>
             </div>
 
-            {/* Titles */}
-            <div className="text-center mb-8 space-y-1.5">
-              <h1 className="text-2xl font-semibold tracking-tight text-white">
-                Admin Login
-              </h1>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-white/60">
-                Tijaniyah Muslim Pro · Control Panel
-              </p>
+                {/* Key Metrics */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="relative z-10 grid grid-cols-2 gap-4"
+                >
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div className="text-3xl font-bold text-[#18F59B] mb-2">98%</div>
+                    <div className="text-white/80 text-sm">User Satisfaction</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div className="text-3xl font-bold text-[#18F59B] mb-2">24/7</div>
+                    <div className="text-white/80 text-sm">System Uptime</div>
+                  </div>
+                </motion.div>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="flex items-center justify-between text-xs font-medium text-white/80"
+              {/* Right Section - Login Form */}
+              <div className="bg-white p-12 flex flex-col justify-center">
+                {/* Welcome Message */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="mb-8"
                 >
-                  <span>Email address</span>
-                  <span className="text-[10px] text-white/45">Use your admin email</span>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+                  <p className="text-gray-600 text-sm">Please sign in to access your dashboard.</p>
+                </motion.div>
+
+                {/* Demo Role Selection */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="mb-8"
+                >
+                  <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">
+                    SELECT DEMO ROLE
+                  </label>
+                  <div className="flex gap-3">
+                    {roleOptions.map((role) => (
+                      <motion.button
+                        key={role.id}
+                        type="button"
+                        onClick={() => setSelectedRole(role.id)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                          selectedRole === role.id
+                            ? `bg-gradient-to-br ${role.color} border-[#18F59B] text-white shadow-lg`
+                            : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className={`${selectedRole === role.id ? 'text-white' : 'text-gray-400'}`}>
+                          {role.icon}
+                        </div>
+                        <span className="text-xs font-medium">{role.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Login Form */}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Email Field */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="space-y-2"
+                  >
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                      Email Address
                 </label>
-                <div className="relative group">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     id="email"
                     type="email"
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="superadmin@tijaniyahmuslimpro.com"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl bg-white/8 text-sm text-white placeholder-white/35 border border-white/14 focus:outline-none focus:ring-2 focus:ring-[#18F59B]/40 focus:border-[#18F59B]/70 transition-all [box-shadow:0_0_0_1px_rgba(255,255,255,0.02)]"
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@company.com"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#18F59B]/50 focus:border-[#18F59B] transition-all text-gray-900 placeholder-gray-400"
                     autoComplete="email"
                     disabled={loading}
                     required
                   />
                 </div>
-              </div>
+                  </motion.div>
 
-              {/* Password */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <label
-                    htmlFor="password"
-                    className="font-medium text-white/80"
+                  {/* Password Field */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="space-y-2"
                   >
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                     Password
                   </label>
                   <button
                     type="button"
-                    className="text-[11px] text-[#18F59B]/80 hover:text-[#18F59B] transition-colors"
+                        className="text-xs text-[#0A3D35] hover:text-[#18F59B] transition-colors font-medium"
                   >
                     Forgot password?
                   </button>
                 </div>
-                <div className="relative group">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-9 py-2.5 rounded-2xl bg-white/8 text-sm text-white placeholder-white/35 border border-white/14 focus:outline-none focus:ring-2 focus:ring-[#18F59B]/40 focus:border-[#18F59B]/70 transition-all [box-shadow:0_0_0_1px_rgba(255,255,255,0.02)]"
+                        className="w-full pl-11 pr-11 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#18F59B]/50 focus:border-[#18F59B] transition-all text-gray-900 placeholder-gray-400"
                     autoComplete="current-password"
                     disabled={loading}
                     required
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(prev => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/75 transition-colors"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     disabled={loading}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-              </div>
+                  </motion.div>
 
-              {/* Error message */}
+                  {/* Error Message */}
               {error && (
                 <motion.div
-                  initial={{ opacity: 0, y: -6 }}
+                      initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl border border-red-400/35 bg-red-500/10 px-3.5 py-2.5 text-xs text-red-100 flex items-start gap-2"
+                      className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-2"
                 >
-                  <span className="mt-[2px] inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500/40 text-[10px] font-semibold">
+                      <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
                     !
                   </span>
-                  <span className="flex-1 leading-relaxed">{error}</span>
+                      <span className="flex-1">{error}</span>
                 </motion.div>
               )}
 
-              {/* Sign in button */}
+                  {/* Sign In Button */}
               <motion.button
                 type="submit"
                 disabled={loading}
-                whileHover={!loading ? { y: -1, boxShadow: '0 14px 40px rgba(0,0,0,0.8)' } : undefined}
-                whileTap={!loading ? { scale: 0.97 } : undefined}
-                className="w-full mt-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#0A3D35] to-[#0E5146] px-4 py-2.75 text-sm font-semibold text-white shadow-[0_12px_35px_rgba(0,0,0,0.85)] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                    whileHover={!loading ? { scale: 1.02 } : undefined}
+                    whileTap={!loading ? { scale: 0.98 } : undefined}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0A3D35] to-[#0E5146] px-4 py-3.5 text-sm font-semibold text-white shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all"
               >
                 {loading ? (
                   <>
@@ -183,36 +417,24 @@ export function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <LogIn className="w-4 h-4" />
-                    <span>Sign in</span>
+                        <span>Sign In</span>
+                        <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </motion.button>
+                </form>
 
-              {/* Hint for seeded logins */}
-              <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-[11px] text-white/65">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-medium text-white/80">Seeded super admin</span>
-                  <span className="rounded-full bg-black/40 px-2 py-[2px] text-[10px] text-[#18F59B] border border-[#18F59B]/35">
-                    SUPER_ADMIN
-                  </span>
-                </div>
-                <p className="leading-relaxed">
-                  <span className="text-white/80">Email:</span>{' '}
-                  superadmin@tijaniyahmuslimpro.com
-                </p>
-                <p className="leading-relaxed">
-                  <span className="text-white/80">Password:</span>{' '}
-                  SuperAdmin123!@#
-                </p>
+                {/* Copyright */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                  className="mt-8 text-center text-xs text-gray-500"
+                >
+                  © {new Date().getFullYear()} Tijaniyah Muslim Pro. All rights reserved.
+                </motion.div>
               </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-4 text-center text-[11px] text-white/45">
-          © {new Date().getFullYear()} Tijaniyah Muslim Pro · Admin Console
+            </div>
         </div>
         </motion.div>
       </div>
