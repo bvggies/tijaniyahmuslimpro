@@ -67,20 +67,33 @@ async function main() {
   for (const adminUser of adminUsers) {
     const existingUser = await prisma.user.findUnique({
       where: { email: adminUser.email },
+      include: { role: true },
     });
 
+    const role = await prisma.role.findUnique({
+      where: { name: adminUser.role },
+    });
+
+    if (!role) {
+      console.error(`  ❌ Role "${adminUser.role}" not found, skipping user creation`);
+      continue;
+    }
+
     if (existingUser) {
-      console.log(`  ✓ ${adminUser.role} user already exists: ${adminUser.email}`);
-    } else {
-      const role = await prisma.role.findUnique({
-        where: { name: adminUser.role },
+      // Reset password for existing user to ensure it matches seeded password
+      const passwordHash = await bcrypt.hash(adminUser.password, 12);
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          passwordHash,
+          name: adminUser.name,
+          roleId: role.id, // Ensure role is correct
+        },
       });
-
-      if (!role) {
-        console.error(`  ❌ Role "${adminUser.role}" not found, skipping user creation`);
-        continue;
-      }
-
+      console.log(`  ✓ ${adminUser.role} user password reset: ${adminUser.email}`);
+      console.log(`     Password: ${adminUser.password}`);
+      console.log(`     ⚠️  Please change this password after first login!`);
+    } else {
       const passwordHash = await bcrypt.hash(adminUser.password, 12);
 
       await prisma.user.create({
