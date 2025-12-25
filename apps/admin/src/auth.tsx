@@ -41,23 +41,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       res = await fetch(`${API_BASE_URL}/api/auth-me`, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
     } catch (err) {
       console.error('Admin auth: failed to reach API in fetchMe', err);
-      setUser(null);
-      setAccessToken(null);
-      window.localStorage.removeItem('admin_accessToken');
+      // Don't clear token on network errors - might be temporary
+      // Only clear if it's a 401/403 (unauthorized)
       return;
     }
+    
     if (!res.ok) {
-      setUser(null);
-      setAccessToken(null);
-      window.localStorage.removeItem('admin_accessToken');
+      // Only clear token if unauthorized (401) or forbidden (403)
+      if (res.status === 401 || res.status === 403) {
+        setUser(null);
+        setAccessToken(null);
+        window.localStorage.removeItem('admin_accessToken');
+      }
       return;
     }
-    const json = await res.json();
-    setUser(json.user);
+    
+    try {
+      const json = await res.json();
+      if (json.user) {
+        setUser(json.user);
+      }
+    } catch (err) {
+      console.error('Admin auth: failed to parse response in fetchMe', err);
+    }
   };
 
   const login = async (email: string, password: string) => {
