@@ -408,6 +408,5 @@ export function LoginPage() {
           </div>
         </motion.div>
       </div>
-    </div>
   );
 }
