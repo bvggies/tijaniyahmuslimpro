@@ -184,7 +184,7 @@ export function LoginPage() {
           className="relative z-10 w-full max-w-6xl mx-auto"
         >
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <div className="grid md:grid-cols-2 min-h-[600px]">
+            <div className="grid md:grid-cols-2">
               {/* Left Section - Promotional Content */}
               <div className="bg-gray-100 p-12 flex flex-col justify-between relative overflow-hidden">
                 {/* Subtle Islamic pattern overlay */}
@@ -258,29 +258,30 @@ export function LoginPage() {
               </div>
 
               {/* Right Section - Login Form */}
-              <div className="bg-gray-100 p-12 flex flex-col justify-center">
-                {/* Welcome Message */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mb-8"
-                >
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-                  <p className="text-gray-600 text-sm">Please sign in to access your dashboard.</p>
-                </motion.div>
+              <div className="bg-gray-100 p-12 flex flex-col">
+                <div className="flex-1 flex flex-col justify-center">
+                  {/* Welcome Message */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="mb-6"
+                  >
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+                    <p className="text-gray-600 text-sm">Please sign in to access your dashboard.</p>
+                  </motion.div>
 
-                {/* Demo Role Selection */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mb-8"
-                >
+                  {/* Demo Role Selection */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="mb-6"
+                  >
                   <label className="block text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">
                     SELECT DEMO ROLE
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     {roleOptions.map((role) => (
                       <motion.button
                         key={role.id}
@@ -288,13 +289,13 @@ export function LoginPage() {
                         onClick={() => setSelectedRole(role.id)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-full border-2 transition-all ${
+                        className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-full border-2 transition-all ${
                           selectedRole === role.id
-                            ? 'bg-gradient-to-br from-[#0A3D35] to-[#18F59B] border-[#18F59B] text-white shadow-lg'
+                            ? 'bg-gradient-to-br from-[#0A3D35] to-[#18F59B] border-[#18F59B] text-white shadow-md'
                             : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400'
                         }`}
                       >
-                        <div className={`${selectedRole === role.id ? 'text-white' : 'text-gray-400'}`}>
+                        <div className={`${selectedRole === role.id ? 'text-white' : 'text-gray-500'}`}>
                           {role.icon}
                         </div>
                         <span className="text-xs font-medium">{role.label}</span>
@@ -304,26 +305,26 @@ export function LoginPage() {
                 </motion.div>
 
                 {/* Login Form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Email Field */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="space-y-2"
+                    className="space-y-1.5"
                   >
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                       Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                       <input
                         id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@company.com"
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#18F59B]/50 focus:border-[#18F59B] transition-all text-gray-900 placeholder-gray-400"
+                        className="w-full pl-11 pr-4 py-2.5 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#18F59B]/30 focus:border-[#18F59B] transition-all text-gray-900 placeholder-gray-400"
                         autoComplete="email"
                         disabled={loading}
                         required
@@ -336,7 +337,7 @@ export function LoginPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className="space-y-2"
+                    className="space-y-1.5"
                   >
                     <div className="flex items-center justify-between">
                       <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -350,14 +351,14 @@ export function LoginPage() {
                       </button>
                     </div>
                     <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                       <input
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        className="w-full pl-11 pr-11 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#18F59B]/50 focus:border-[#18F59B] transition-all text-gray-900 placeholder-gray-400"
+                        className="w-full pl-11 pr-11 py-2.5 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#18F59B]/30 focus:border-[#18F59B] transition-all text-gray-900 placeholder-gray-400"
                         autoComplete="current-password"
                         disabled={loading}
                         required
@@ -365,7 +366,7 @@ export function LoginPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
                         disabled={loading}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
@@ -392,12 +393,12 @@ export function LoginPage() {
                   <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={!loading ? { scale: 1.02 } : undefined}
-                    whileTap={!loading ? { scale: 0.98 } : undefined}
+                    whileHover={!loading ? { scale: 1.01 } : undefined}
+                    whileTap={!loading ? { scale: 0.99 } : undefined}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
-                    className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0A3D35] to-[#18F59B] px-4 py-3.5 text-sm font-semibold text-white shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                    className="w-full mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#0A3D35] to-[#18F59B] px-4 py-3 text-sm font-semibold text-white shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed transition-all"
                   >
                     {loading ? (
                       <>
@@ -416,13 +417,14 @@ export function LoginPage() {
                     )}
                   </motion.button>
                 </form>
+                </div>
 
                 {/* Copyright */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 }}
-                  className="mt-8 text-center text-xs text-gray-500"
+                  className="mt-6 text-center text-xs text-gray-500"
                 >
                   © {new Date().getFullYear()} Tijaniyah Muslim Pro. All rights reserved.
                 </motion.div>
