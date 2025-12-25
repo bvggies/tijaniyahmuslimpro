@@ -13,7 +13,6 @@ import {
   Smile,
   Home
 } from 'lucide-react';
-import { IslamicBackground } from '@tmp/ui';
 import { useAuth } from '../auth';
 
 type DemoRole = 'admin' | 'manager' | 'cleaner' | 'maintenance' | 'guest';
@@ -81,100 +80,7 @@ export function LoginPage() {
   };
 
   return (
-    <IslamicBackground>
-      <div className="min-h-screen flex items-center justify-center px-4 py-8">
-        {/* Animated Islamic geometric patterns in background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Floating geometric shapes with animations */}
-          <motion.div
-            className="absolute top-20 left-10 w-32 h-32 opacity-8"
-            animate={{
-              rotate: [0, 360],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          >
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <path
-                d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
-                fill="none"
-                stroke="#18F59B"
-                strokeWidth="1"
-                opacity="0.2"
-              />
-              <circle cx="50" cy="50" r="30" fill="none" stroke="#18F59B" strokeWidth="1" opacity="0.15" />
-            </svg>
-          </motion.div>
-
-          <motion.div
-            className="absolute bottom-32 right-16 w-24 h-24 opacity-8"
-            animate={{
-              rotate: [360, 0],
-              scale: [1, 1.3, 1],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          >
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <polygon
-                points="50,5 95,50 50,95 5,50"
-                fill="none"
-                stroke="#0A3D35"
-                strokeWidth="1"
-                opacity="0.3"
-              />
-              <polygon
-                points="50,20 80,50 50,80 20,50"
-                fill="none"
-                stroke="#18F59B"
-                strokeWidth="1"
-                opacity="0.2"
-              />
-            </svg>
-          </motion.div>
-
-          <motion.div
-            className="absolute top-1/2 left-1/4 w-16 h-16 opacity-6"
-            animate={{
-              rotate: [0, -360],
-              y: [0, -20, 0],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <path
-                d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
-                fill="none"
-                stroke="#18F59B"
-                strokeWidth="1"
-                opacity="0.2"
-              />
-            </svg>
-          </motion.div>
-
-          {/* Animated background glow effects */}
-          <motion.div
-            className="absolute -top-24 -left-16 w-80 h-80 rounded-full bg-[#18F59B]/10 blur-3xl"
-            animate={{ y: [0, -20, 0], x: [0, 15, 0] }}
-            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute bottom-[-6rem] right-[-3rem] w-96 h-96 rounded-full bg-[#0A3D35]/30 blur-3xl"
-            animate={{ y: [0, 18, 0], x: [0, -12, 0] }}
-            transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </div>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
 
         {/* Main container - white rounded card */}
         <motion.div
@@ -187,22 +93,91 @@ export function LoginPage() {
             <div className="grid md:grid-cols-2">
               {/* Left Section - Promotional Content */}
               <div className="bg-gray-100 p-12 flex flex-col justify-between relative overflow-hidden">
-                {/* Subtle Islamic pattern overlay */}
-                <div className="absolute inset-0 opacity-[0.02]">
-                  <svg className="w-full h-full" viewBox="0 0 400 400">
-                    <defs>
-                      <pattern id="islamic-pattern-left" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                        <path
-                          d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
-                          fill="none"
-                          stroke="#0A3D35"
-                          strokeWidth="0.5"
-                        />
-                        <circle cx="50" cy="50" r="20" fill="none" stroke="#0A3D35" strokeWidth="0.5" />
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#islamic-pattern-left)" />
-                  </svg>
+                {/* Animated Islamic geometric patterns - large outline shapes */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  {/* Large animated star */}
+                  <motion.div
+                    className="absolute top-10 right-10 w-40 h-40"
+                    animate={{
+                      rotate: [0, 360],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <path
+                        d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
+                        fill="none"
+                        stroke="#0A3D35"
+                        strokeWidth="1.5"
+                        opacity="0.15"
+                      />
+                    </svg>
+                  </motion.div>
+
+                  {/* Large animated circle */}
+                  <motion.div
+                    className="absolute bottom-20 left-8 w-48 h-48"
+                    animate={{
+                      rotate: [360, 0],
+                      scale: [1, 1.15, 1],
+                    }}
+                    transition={{
+                      duration: 25,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#0A3D35" strokeWidth="1.5" opacity="0.15" />
+                    </svg>
+                  </motion.div>
+
+                  {/* Medium animated star */}
+                  <motion.div
+                    className="absolute top-1/2 left-4 w-32 h-32"
+                    animate={{
+                      rotate: [0, -360],
+                      y: [0, -15, 0],
+                    }}
+                    transition={{
+                      duration: 18,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <path
+                        d="M50,10 L60,40 L90,40 L65,60 L75,90 L50,75 L25,90 L35,60 L10,40 L40,40 Z"
+                        fill="none"
+                        stroke="#0A3D35"
+                        strokeWidth="1.5"
+                        opacity="0.12"
+                      />
+                    </svg>
+                  </motion.div>
+
+                  {/* Another circle */}
+                  <motion.div
+                    className="absolute top-32 right-16 w-36 h-36"
+                    animate={{
+                      rotate: [360, 0],
+                      scale: [1, 1.2, 1],
+                    }}
+                    transition={{
+                      duration: 22,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="35" fill="none" stroke="#0A3D35" strokeWidth="1.5" opacity="0.12" />
+                    </svg>
+                  </motion.div>
                 </div>
 
                 <div className="relative z-10">
@@ -239,12 +214,12 @@ export function LoginPage() {
                   </motion.div>
                 </div>
 
-                {/* Key Metrics Cards */}
+                {/* Key Metrics Cards - Stacked Vertically */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="relative z-10 grid grid-cols-2 gap-4"
+                  className="relative z-10 flex flex-col gap-4"
                 >
                   <div className="bg-white rounded-2xl p-6 shadow-md">
                     <div className="text-4xl font-bold text-[#0A3D35] mb-2">98%</div>
@@ -433,6 +408,6 @@ export function LoginPage() {
           </div>
         </motion.div>
       </div>
-    </IslamicBackground>
+    </div>
   );
 }
