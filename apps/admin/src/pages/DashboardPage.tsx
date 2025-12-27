@@ -77,32 +77,98 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 overflow-hidden"
       style={{
+        position: 'relative',
+        backgroundColor: '#ffffff',
+        borderRadius: '1rem',
+        padding: '1.5rem',
+        border: '1px solid #f3f4f6',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+        transition: 'all 0.3s ease',
+        overflow: 'hidden',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.transform = 'translateY(-4px)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)';
+        e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
       {/* Gradient accent bar */}
-      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.gradient}`} />
+      <div 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: color === 'bg-blue-500' ? 'linear-gradient(to right, #3b82f6, #2563eb)' :
+                      color === 'bg-red-500' ? 'linear-gradient(to right, #ef4444, #dc2626)' :
+                      color === 'bg-yellow-500' ? 'linear-gradient(to right, #eab308, #ca8a04)' :
+                      color === 'bg-green-500' ? 'linear-gradient(to right, #22c55e, #16a34a)' :
+                      color === 'bg-purple-500' ? 'linear-gradient(to right, #a855f7, #9333ea)' :
+                      color === 'bg-indigo-500' ? 'linear-gradient(to right, #6366f1, #4f46e5)' :
+                      color === 'bg-pink-500' ? 'linear-gradient(to right, #ec4899, #db2777)' :
+                      color === 'bg-teal-500' ? 'linear-gradient(to right, #14b8a6, #0d9488)' :
+                      'linear-gradient(to right, #6b7280, #4b5563)',
+        }}
+      />
       
-      <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-xl ${colors.bg} group-hover:scale-110 transition-transform duration-300`}>
-          <div className={colors.icon}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div 
+          style={{
+            padding: '0.75rem',
+            borderRadius: '0.75rem',
+            backgroundColor: color === 'bg-blue-500' ? '#eff6ff' :
+                            color === 'bg-red-500' ? '#fef2f2' :
+                            color === 'bg-yellow-500' ? '#fefce8' :
+                            color === 'bg-green-500' ? '#f0fdf4' :
+                            color === 'bg-purple-500' ? '#faf5ff' :
+                            color === 'bg-indigo-500' ? '#eef2ff' :
+                            color === 'bg-pink-500' ? '#fdf2f8' :
+                            color === 'bg-teal-500' ? '#f0fdfa' :
+                            '#f9fafb',
+            transition: 'transform 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <div 
+            style={{
+              color: color === 'bg-blue-500' ? '#2563eb' :
+                     color === 'bg-red-500' ? '#dc2626' :
+                     color === 'bg-yellow-500' ? '#ca8a04' :
+                     color === 'bg-green-500' ? '#16a34a' :
+                     color === 'bg-purple-500' ? '#9333ea' :
+                     color === 'bg-indigo-500' ? '#4f46e5' :
+                     color === 'bg-pink-500' ? '#db2777' :
+                     color === 'bg-teal-500' ? '#0d9488' :
+                     '#4b5563',
+            }}
+          >
             {icon}
           </div>
         </div>
         {change && (
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
-            trend === 'up' 
-              ? 'bg-green-50 text-green-700' 
-              : 'bg-red-50 text-red-700'
-          }`}>
+          <div 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              backgroundColor: trend === 'up' ? '#f0fdf4' : '#fef2f2',
+              color: trend === 'up' ? '#15803d' : '#dc2626',
+            }}
+          >
             {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
             <span>{change}</span>
           </div>
@@ -110,19 +176,22 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
       </div>
       <div>
         <div 
-          className="text-3xl font-bold mb-1"
           style={{
+            fontSize: '1.875rem',
+            fontWeight: '700',
+            marginBottom: '0.25rem',
             background: 'linear-gradient(to bottom right, #0A3D35, #18F59B)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
+            lineHeight: '1.2',
           }}
         >
           {value}
         </div>
-        <div className="text-sm font-medium text-gray-700 mb-1">{title}</div>
+        <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>{title}</div>
         {description && (
-          <div className="text-xs text-gray-500 mt-1">{description}</div>
+          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>{description}</div>
         )}
       </div>
     </motion.div>
@@ -247,23 +316,62 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl p-8 text-white"
         style={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '1.5rem',
+          padding: '2rem',
+          color: '#ffffff',
           background: 'linear-gradient(to bottom right, #0A3D35, #0d4d42, #18F59B)',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
         }}
       >
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-3xl -ml-24 -mb-24" />
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '16rem',
+            height: '16rem',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '50%',
+            filter: 'blur(3rem)',
+            marginRight: '-8rem',
+            marginTop: '-8rem',
+          }}
+        />
+        <div 
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '12rem',
+            height: '12rem',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '50%',
+            filter: 'blur(3rem)',
+            marginLeft: '-6rem',
+            marginBottom: '-6rem',
+          }}
+        />
         
-        <div className="relative z-10">
-          <h2 className="text-3xl font-bold mb-3 flex items-center gap-3">
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <h2 
+            style={{
+              fontSize: '1.875rem',
+              fontWeight: '700',
+              marginBottom: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+            }}
+          >
             Welcome back! 
             <motion.span
               animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
@@ -272,12 +380,19 @@ export function DashboardPage() {
               👋
             </motion.span>
           </h2>
-          <p className="text-white/90 text-lg">Here's what's happening with your platform today.</p>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.125rem' }}>
+            Here's what's happening with your platform today.
+          </p>
         </div>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div 
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        style={{
+          gap: '1.5rem',
+        }}
+      >
         {stats.map((stat, index) => (
           <motion.div
             key={stat.title}
