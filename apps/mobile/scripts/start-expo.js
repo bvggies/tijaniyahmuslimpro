@@ -17,18 +17,15 @@ const projectRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 
 // Build expo start command
-// Use --offline flag to prevent network requests during startup
+// Note: Expo only allows one of: --offline, --host, --tunnel, --lan, --localhost
 const expoArgs = ['expo', 'start'];
 if (args.length > 0) {
+  // User provided flags - use them as-is
   expoArgs.push(...args);
-  // If user specifies --lan or --tunnel, don't force --offline
-  // But still add it if not already present to prevent dependency checks
-  if (!args.includes('--offline') && !args.includes('--lan') && !args.includes('--tunnel')) {
-    expoArgs.push('--offline');
-  }
 } else {
   // Default to offline mode to avoid network fetch errors
-  expoArgs.push('--offline', '--localhost');
+  // Using --offline instead of --localhost to prevent dependency check network calls
+  expoArgs.push('--offline');
 }
 
 console.log('Starting Expo with optimized settings...');
