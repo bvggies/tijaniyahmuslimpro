@@ -4,7 +4,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "npx expo start",
+    "start": "node scripts/start-expo.js",
+    "start:lan": "node scripts/start-expo.js --lan",
+    "start:tunnel": "node scripts/start-expo.js --tunnel",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
     "web": "npx expo start --web",
@@ -49,6 +51,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "cross-env": "^7.0.3",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.3.3"
   }
