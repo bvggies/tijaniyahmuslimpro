@@ -110,7 +110,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-modern">
           {filteredNavItems.map((item) => {
             const isActive = currentPath === item.to;
             const Icon = item.icon;
@@ -200,7 +200,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-y-auto bg-gray-50">
+        <main className="flex-1 p-6 overflow-y-auto bg-gray-50 scrollbar-modern">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentPath}
