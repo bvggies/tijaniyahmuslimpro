@@ -23,9 +23,9 @@ if (args.length > 0) {
   // User provided flags - use them as-is
   expoArgs.push(...args);
 } else {
-  // Default to offline mode to avoid network fetch errors
-  // Using --offline instead of --localhost to prevent dependency check network calls
-  expoArgs.push('--offline');
+  // Default to localhost mode - allows Expo Go to connect while still working locally
+  // Environment variables (EXPO_NO_DEPENDENCY_CHECK) prevent network dependency checks
+  expoArgs.push('--localhost');
 }
 
 console.log('Starting Expo with optimized settings...');
