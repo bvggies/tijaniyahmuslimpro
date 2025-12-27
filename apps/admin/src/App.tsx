@@ -80,16 +80,22 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <motion.aside
-        initial={{ x: -250 }}
+        initial={false}
         animate={{ x: isSidebarOpen ? 0 : -250 }}
-        transition={{ duration: 0.3 }}
-        className="fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-xl border-r border-gray-200/50 flex flex-col md:relative md:translate-x-0"
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="fixed inset-y-0 left-0 z-50 w-64 bg-white flex flex-col md:relative md:translate-x-0"
         style={{
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          borderRight: '1px solid #e5e7eb',
         }}
       >
         {/* Sidebar Header */}
-        <div className="px-6 py-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-br from-white to-gray-50/50">
+        <div 
+          className="px-6 py-6 border-b border-gray-100 flex items-center justify-between"
+          style={{
+            background: 'linear-gradient(to bottom right, #ffffff, rgba(249, 250, 251, 0.5))',
+          }}
+        >
           <div className="flex items-center gap-3">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
@@ -121,7 +127,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-modern">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-modern" style={{ backgroundColor: '#ffffff' }}>
           {filteredNavItems.map((item) => {
             const isActive = currentPath === item.to;
             const Icon = item.icon;
@@ -158,7 +164,12 @@ function Shell({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User Info & Logout */}
-        <div className="px-4 py-5 border-t border-gray-100 bg-gradient-to-br from-gray-50/50 to-white">
+        <div 
+          className="px-4 py-5 border-t border-gray-100"
+          style={{
+            background: 'linear-gradient(to bottom right, rgba(249, 250, 251, 0.5), #ffffff)',
+          }}
+        >
           <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-white border border-gray-100 shadow-sm">
             <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#18F59B] to-[#0A3D35] flex items-center justify-center text-white font-bold text-sm shadow-md">
               {user?.email?.[0]?.toUpperCase() || 'U'}
@@ -183,7 +194,15 @@ function Shell({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-gray-100/50 shadow-sm px-6 py-4 flex items-center justify-between">
+        <header 
+          className="sticky top-0 z-40 border-b shadow-sm px-6 py-4 flex items-center justify-between"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(229, 231, 235, 0.5)',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          }}
+        >
           <div className="flex items-center gap-3">
             <button 
               className="md:hidden text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors" 

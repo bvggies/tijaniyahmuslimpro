@@ -31,7 +31,12 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-8"
+      style={{
+        background: 'linear-gradient(to bottom right, #f9fafb, #ffffff)',
+      }}
+    >
       {/* Animated background glow effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div

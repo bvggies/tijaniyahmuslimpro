@@ -203,102 +203,147 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
 export function DashboardPage() {
   const { accessToken } = useAuth();
 
-  const { data: statsData, isLoading } = useQuery({
-    queryKey: ['dashboard-stats'],
+  const { data: analyticsData, isLoading } = useQuery({
+    queryKey: ['dashboard-analytics'],
     queryFn: async () => {
-      const [users, campaigns, tickets, analytics] = await Promise.all([
-        apiRequest<{ users: any[] }>('/api/admin-users', {}, accessToken).catch(() => ({ users: [] })),
-        apiRequest<{ campaigns: any[] }>('/api/admin-campaigns-analytics', {}, accessToken).catch(() => ({ campaigns: [] })),
-        apiRequest<{ tickets: any[] }>('/api/admin-support-tickets', {}, accessToken).catch(() => ({ tickets: [] })),
-        apiRequest<{ analytics: any }>('/api/admin-campaigns-analytics', {}, accessToken).catch(() => ({ analytics: null })),
-      ]);
+      const data = await apiRequest<{
+        stats: {
+          totalUsers: number;
+          usersThisMonth: number;
+          userGrowthRate: string;
+          totalCampaigns: number;
+          activeCampaigns: number;
+          totalDonations: number;
+          donationsThisMonth: number;
+          openTickets: number;
+          totalTickets: number;
+          messagesToday: number;
+          totalMessages: number;
+          upcomingEvents: number;
+          totalEvents: number;
+          communityPostsToday: number;
+          totalCommunityPosts: number;
+          notificationsToday: number;
+          totalNotifications: number;
+        };
+        recentActivity: {
+          users: Array<{
+            id: string;
+            email: string;
+            name: string | null;
+            role: string;
+            createdAt: string;
+          }>;
+          tickets: Array<{
+            id: string;
+            subject: string;
+            status: string;
+            userEmail: string;
+            userName: string | null;
+            createdAt: string;
+          }>;
+        };
+      }>('/api/admin-dashboard-analytics', {}, accessToken).catch(() => ({
+        stats: {
+          totalUsers: 0,
+          usersThisMonth: 0,
+          userGrowthRate: '0%',
+          totalCampaigns: 0,
+          activeCampaigns: 0,
+          totalDonations: 0,
+          donationsThisMonth: 0,
+          openTickets: 0,
+          totalTickets: 0,
+          messagesToday: 0,
+          totalMessages: 0,
+          upcomingEvents: 0,
+          totalEvents: 0,
+          communityPostsToday: 0,
+          totalCommunityPosts: 0,
+          notificationsToday: 0,
+          totalNotifications: 0,
+        },
+        recentActivity: { users: [], tickets: [] },
+      }));
 
-      const totalUsers = users.users?.length || 0;
-      const activeCampaigns = campaigns.campaigns?.filter((c: any) => c.isActive)?.length || 0;
-      const openTickets = tickets.tickets?.filter((t: any) => t.status === 'open')?.length || 0;
-      const totalRevenue = analytics?.analytics?.totalRevenue || 0;
-
-      return {
-        totalUsers,
-        activeCampaigns,
-        openTickets,
-        totalRevenue,
-        activeSessions: 0, // Would need separate endpoint
-        messagesToday: 0, // Would need separate endpoint
-        upcomingEvents: 0, // Would need separate endpoint
-        growthRate: '24.8%',
-      };
+      return data;
     },
     enabled: !!accessToken,
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
+  const statsData = analyticsData?.stats;
+  const recentActivity = analyticsData?.recentActivity;
+
   const stats = [
     {
       title: 'Total Users',
       value: statsData?.totalUsers || 0,
-      change: '+12.5%',
+      change: statsData?.userGrowthRate ? `+${statsData.userGrowthRate}` : undefined,
       icon: <Users className="w-6 h-6" />,
       color: 'bg-blue-500',
       description: 'Registered users',
-      trend: 'up' as const,
+      trend: parseFloat(statsData?.userGrowthRate || '0') > 0 ? ('up' as const) : undefined,
     },
     {
       title: 'Active Campaigns',
       value: statsData?.activeCampaigns || 0,
       icon: <Heart className="w-6 h-6" />,
       color: 'bg-red-500',
-      description: 'Donation campaigns',
+      description: `Out of ${statsData?.totalCampaigns || 0} total`,
     },
     {
       title: 'Open Support Tickets',
       value: statsData?.openTickets || 0,
-      change: '-2',
+      change: statsData?.totalTickets ? `${statsData.totalTickets - (statsData.openTickets || 0)} resolved` : undefined,
       icon: <HelpCircle className="w-6 h-6" />,
       color: 'bg-yellow-500',
       description: 'Requires attention',
-      trend: 'down' as const,
+      trend: statsData?.openTickets === 0 ? ('down' as const) : undefined,
     },
     {
-      title: 'Total Revenue',
-      value: `$${((statsData?.totalRevenue || 0) / 100).toLocaleString()}`,
-      change: '+8.2%',
+      title: 'Total Donations',
+      value: `$${((statsData?.totalDonations || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      change: statsData?.donationsThisMonth ? `${statsData.donationsThisMonth} this month` : undefined,
       icon: <DollarSign className="w-6 h-6" />,
       color: 'bg-green-500',
-      description: 'From donations',
-      trend: 'up' as const,
-    },
-    {
-      title: 'Active Sessions',
-      value: statsData?.activeSessions || 0,
-      icon: <Activity className="w-6 h-6" />,
-      color: 'bg-purple-500',
-      description: 'Users online now',
+      description: 'From all campaigns',
+      trend: (statsData?.donationsThisMonth || 0) > 0 ? ('up' as const) : undefined,
     },
     {
       title: 'Messages Today',
       value: statsData?.messagesToday || 0,
-      change: '+15%',
+      change: statsData?.totalMessages ? `${statsData.totalMessages} total` : undefined,
       icon: <MessageSquare className="w-6 h-6" />,
       color: 'bg-indigo-500',
       description: 'Chat messages',
-      trend: 'up' as const,
+      trend: (statsData?.messagesToday || 0) > 0 ? ('up' as const) : undefined,
     },
     {
       title: 'Upcoming Events',
       value: statsData?.upcomingEvents || 0,
+      change: statsData?.totalEvents ? `${statsData.totalEvents} total` : undefined,
       icon: <Calendar className="w-6 h-6" />,
       color: 'bg-pink-500',
-      description: 'This week',
+      description: 'Scheduled events',
     },
     {
-      title: 'Growth Rate',
-      value: statsData?.growthRate || '0%',
-      change: '+3.2%',
+      title: 'Community Posts',
+      value: statsData?.communityPostsToday || 0,
+      change: statsData?.totalCommunityPosts ? `${statsData.totalCommunityPosts} total` : undefined,
+      icon: <Activity className="w-6 h-6" />,
+      color: 'bg-purple-500',
+      description: 'Posts today',
+      trend: (statsData?.communityPostsToday || 0) > 0 ? ('up' as const) : undefined,
+    },
+    {
+      title: 'Notifications Sent',
+      value: statsData?.notificationsToday || 0,
+      change: statsData?.totalNotifications ? `${statsData.totalNotifications} total` : undefined,
       icon: <TrendingUp className="w-6 h-6" />,
       color: 'bg-teal-500',
-      description: 'Month-over-month',
-      trend: 'up' as const,
+      description: 'Sent today',
+      trend: (statsData?.notificationsToday || 0) > 0 ? ('up' as const) : undefined,
     },
   ];
 
@@ -400,48 +445,58 @@ export function DashboardPage() {
             </button>
           </div>
           <div className="space-y-3">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-[#18F59B]/30 hover:shadow-md transition-all group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#18F59B]/20 to-[#0A3D35]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 text-[#18F59B]" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-gray-900">New user registered</div>
-                <div className="text-xs text-gray-500 mt-0.5">2 minutes ago</div>
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Heart className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-gray-900">New donation received</div>
-                <div className="text-xs text-gray-500 mt-0.5">15 minutes ago</div>
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7 }}
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-yellow-300 hover:shadow-md transition-all group cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <HelpCircle className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-gray-900">Support ticket opened</div>
-                <div className="text-xs text-gray-500 mt-0.5">1 hour ago</div>
-              </div>
-            </motion.div>
+            {recentActivity?.users && recentActivity.users.length > 0 ? (
+              recentActivity.users.slice(0, 3).map((user, index) => (
+                <motion.div
+                  key={user.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-[#18F59B]/30 hover:shadow-md transition-all group cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#18F59B]/20 to-[#0A3D35]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Users className="w-6 h-6 text-[#18F59B]" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-gray-900">
+                      New user: {user.name || user.email}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {user.role} · {new Date(user.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500 text-sm">No recent user activity</div>
+            )}
+            {recentActivity?.tickets && recentActivity.tickets.length > 0 ? (
+              recentActivity.tickets.slice(0, 2).map((ticket, index) => (
+                <motion.div
+                  key={ticket.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 + index * 0.1 }}
+                  className={`flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-yellow-300 hover:shadow-md transition-all group cursor-pointer ${
+                    ticket.status === 'open' ? 'border-yellow-200 bg-yellow-50/30' : ''
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <HelpCircle className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-gray-900">{ticket.subject}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {ticket.userName || ticket.userEmail} · {ticket.status} · {new Date(ticket.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              recentActivity?.users && recentActivity.users.length === 0 && (
+                <div className="text-center py-4 text-gray-500 text-sm">No recent tickets</div>
+              )
+            )}
           </div>
         </Card>
       </motion.div>
