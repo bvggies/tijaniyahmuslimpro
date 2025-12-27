@@ -27,34 +27,87 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, change, icon, color, description, trend }: StatCardProps) {
+  const colorMap: Record<string, { bg: string; icon: string; gradient: string }> = {
+    'bg-blue-500': {
+      bg: 'bg-blue-50',
+      icon: 'text-blue-600',
+      gradient: 'from-blue-500 to-blue-600',
+    },
+    'bg-red-500': {
+      bg: 'bg-red-50',
+      icon: 'text-red-600',
+      gradient: 'from-red-500 to-red-600',
+    },
+    'bg-yellow-500': {
+      bg: 'bg-yellow-50',
+      icon: 'text-yellow-600',
+      gradient: 'from-yellow-500 to-yellow-600',
+    },
+    'bg-green-500': {
+      bg: 'bg-green-50',
+      icon: 'text-green-600',
+      gradient: 'from-green-500 to-green-600',
+    },
+    'bg-purple-500': {
+      bg: 'bg-purple-50',
+      icon: 'text-purple-600',
+      gradient: 'from-purple-500 to-purple-600',
+    },
+    'bg-indigo-500': {
+      bg: 'bg-indigo-50',
+      icon: 'text-indigo-600',
+      gradient: 'from-indigo-500 to-indigo-600',
+    },
+    'bg-pink-500': {
+      bg: 'bg-pink-50',
+      icon: 'text-pink-600',
+      gradient: 'from-pink-500 to-pink-600',
+    },
+    'bg-teal-500': {
+      bg: 'bg-teal-50',
+      icon: 'text-teal-600',
+      gradient: 'from-teal-500 to-teal-600',
+    },
+  };
+
+  const colors = colorMap[color] || { bg: 'bg-gray-50', icon: 'text-gray-600', gradient: 'from-gray-500 to-gray-600' };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/50 hover:shadow-md transition-shadow"
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="group relative bg-white rounded-2xl p-6 shadow-modern border border-gray-100 hover:shadow-modern-lg transition-all duration-300 overflow-hidden"
     >
+      {/* Gradient accent bar */}
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.gradient}`} />
+      
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-xl ${color} bg-opacity-10`}>
-          <div className={color.replace('bg-', 'text-')}>
+        <div className={`p-3 rounded-xl ${colors.bg} group-hover:scale-110 transition-transform duration-300`}>
+          <div className={colors.icon}>
             {icon}
           </div>
         </div>
         {change && (
-          <div className={`flex items-center gap-1 text-xs font-medium ${
-            trend === 'up' ? 'text-green-600' : 'text-red-600'
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+            trend === 'up' 
+              ? 'bg-green-50 text-green-700' 
+              : 'bg-red-50 text-red-700'
           }`}>
             {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
             <span>{change}</span>
           </div>
         )}
       </div>
-      <div className="mb-1">
-        <div className="text-3xl font-bold text-[#0A3D35]">{value}</div>
-        <div className="text-sm text-gray-600 mt-1">{title}</div>
+      <div>
+        <div className="text-3xl font-bold bg-gradient-to-br from-[#0A3D35] to-[#18F59B] bg-clip-text text-transparent mb-1">
+          {value}
+        </div>
+        <div className="text-sm font-medium text-gray-700 mb-1">{title}</div>
+        {description && (
+          <div className="text-xs text-gray-500 mt-1">{description}</div>
+        )}
       </div>
-      {description && (
-        <div className="text-xs text-gray-500 mt-2">{description}</div>
-      )}
     </motion.div>
   );
 }
@@ -164,21 +217,42 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading dashboard...</div>
+        <div className="flex flex-col items-center gap-4">
+          <motion.div
+            className="w-12 h-12 rounded-full border-4 border-[#18F59B] border-t-transparent"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          />
+          <div className="text-gray-600 font-medium">Loading dashboard...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-[#0A3D35] to-[#18F59B] rounded-2xl p-8 text-white shadow-lg"
+        className="relative overflow-hidden bg-gradient-to-br from-[#0A3D35] via-[#0d4d42] to-[#18F59B] rounded-3xl p-8 text-white shadow-modern-lg"
       >
-        <h2 className="text-2xl font-bold mb-2">Welcome back! 👋</h2>
-        <p className="text-white/90">Here's what's happening with your platform today.</p>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-3xl -ml-24 -mb-24" />
+        
+        <div className="relative z-10">
+          <h2 className="text-3xl font-bold mb-3 flex items-center gap-3">
+            Welcome back! 
+            <motion.span
+              animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              👋
+            </motion.span>
+          </h2>
+          <p className="text-white/90 text-lg">Here's what's happening with your platform today.</p>
+        </div>
       </motion.div>
 
       {/* Stats Grid */}
@@ -188,7 +262,7 @@ export function DashboardPage() {
             key={stat.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05, duration: 0.4 }}
           >
             <StatCard {...stat} />
           </motion.div>
@@ -199,43 +273,61 @@ export function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: 0.4 }}
       >
-        <Card>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-[#0A3D35]">Recent Activity</h3>
-            <button className="text-sm text-[#18F59B] hover:text-[#0A3D35] font-medium">
+        <Card className="shadow-modern border-gray-100">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-[#0A3D35] to-[#18F59B] bg-clip-text text-transparent">
+              Recent Activity
+            </h3>
+            <button className="text-sm font-semibold text-[#18F59B] hover:text-[#0A3D35] transition-colors flex items-center gap-1 group">
               View all
+              <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="w-10 h-10 rounded-full bg-[#18F59B]/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-[#18F59B]" />
+          <div className="space-y-3">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-[#18F59B]/30 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#18F59B]/20 to-[#0A3D35]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-6 h-6 text-[#18F59B]" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">New user registered</div>
-                <div className="text-xs text-gray-500">2 minutes ago</div>
+                <div className="text-sm font-semibold text-gray-900">New user registered</div>
+                <div className="text-xs text-gray-500 mt-0.5">2 minutes ago</div>
               </div>
-            </div>
-            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Heart className="w-5 h-5 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">New donation received</div>
-                <div className="text-xs text-gray-500">15 minutes ago</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                <HelpCircle className="w-5 h-5 text-yellow-600" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Heart className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">Support ticket opened</div>
-                <div className="text-xs text-gray-500">1 hour ago</div>
+                <div className="text-sm font-semibold text-gray-900">New donation received</div>
+                <div className="text-xs text-gray-500 mt-0.5">15 minutes ago</div>
               </div>
-            </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-yellow-300 hover:shadow-md transition-all group cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <HelpCircle className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-gray-900">Support ticket opened</div>
+                <div className="text-xs text-gray-500 mt-0.5">1 hour ago</div>
+              </div>
+            </motion.div>
           </div>
         </Card>
       </motion.div>

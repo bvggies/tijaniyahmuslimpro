@@ -14,7 +14,10 @@ export function Card({ children, className = '', padding = 'md', ...props }: Car
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-200/50 ${paddings[padding]} ${className}`} {...props}>
+    <div 
+      className={`bg-white rounded-2xl shadow-modern border border-gray-100 hover:shadow-modern-lg transition-shadow duration-300 ${paddings[padding]} ${className}`} 
+      {...props}
+    >
       {children}
     </div>
   );
