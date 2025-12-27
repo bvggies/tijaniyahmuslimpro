@@ -7,6 +7,7 @@
     "start": "node scripts/start-expo.js",
     "start:lan": "node scripts/start-expo.js --lan",
     "start:tunnel": "node scripts/start-expo.js --tunnel",
+    "start:tunnel:clear": "node scripts/start-expo.js --tunnel --clear",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
     "web": "npx expo start --web",

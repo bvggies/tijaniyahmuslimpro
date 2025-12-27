@@ -22,6 +22,16 @@ const expoArgs = ['expo', 'start'];
 if (args.length > 0) {
   // User provided flags - use them as-is
   expoArgs.push(...args);
+  
+  // For tunnel mode, add timeout and retry options
+  if (args.includes('--tunnel')) {
+    // Set longer timeout for tunnel connection
+    process.env.EXPO_TUNNEL_TIMEOUT = '60000'; // 60 seconds
+    // Add --clear flag to clear cache which can help with tunnel issues
+    if (!args.includes('--clear')) {
+      expoArgs.push('--clear');
+    }
+  }
 } else {
   // Default to localhost mode - allows Expo Go to connect while still working locally
   // Environment variables (EXPO_NO_DEPENDENCY_CHECK) prevent network dependency checks
@@ -41,6 +51,10 @@ const child = spawn('npx', expoArgs, {
     EXPO_NO_TELEMETRY: '1',
     EXPO_NO_DEPENDENCY_CHECK: '1',
     EXPO_SKIP_DOCTOR: '1',
+    // Tunnel-specific settings
+    ...(args.includes('--tunnel') ? {
+      EXPO_TUNNEL_TIMEOUT: '60000',
+    } : {}),
   },
 });
 
