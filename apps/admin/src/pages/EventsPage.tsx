@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button } from '@tmp/ui';
+import { motion } from 'framer-motion';
+import { Calendar, Plus, Edit, Trash2, MapPin, Image as ImageIcon } from 'lucide-react';
+import { Card, Button, Input, Modal, Badge, Textarea } from '../components/ui';
 import { useAuth } from '../auth';
-import { FormEvent, useState } from 'react';
+import { apiRequest } from '../lib/api';
 
-interface EventDto {
+interface Event {
   id: string;
   title: string;
   description: string;
@@ -15,305 +18,283 @@ interface EventDto {
   createdAt: string;
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:3000';
-
 export function EventsPage() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<EventDto | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [location, setLocation] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [isActive, setIsActive] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    location: '',
+    imageUrl: '',
+    isActive: true,
+  });
 
-  const { data } = useQuery({
-    queryKey: ['adminEvents'],
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-events'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-events`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!res.ok) throw new Error('Failed to load events');
-      return (await res.json()) as { events: EventDto[] };
+      return apiRequest<{ events: Event[] }>('/api/admin-events', {}, accessToken);
     },
     enabled: !!accessToken,
   });
 
   const createMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-events`, {
+    mutationFn: async (data: typeof formData) => {
+      return apiRequest('/api/admin-events', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
         body: JSON.stringify({
-          title,
-          description,
-          startDate: new Date(startDate).toISOString(),
-          endDate: endDate ? new Date(endDate).toISOString() : null,
-          location: location || null,
-          imageUrl: imageUrl || null,
-          isActive,
+          ...data,
+          startDate: new Date(data.startDate).toISOString(),
+          endDate: data.endDate ? new Date(data.endDate).toISOString() : null,
         }),
-      });
-      if (!res.ok) throw new Error('Failed to create event');
-      return res.json();
+      }, accessToken);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+      setIsModalOpen(false);
       resetForm();
-      void queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async () => {
-      if (!editing) return;
-      const res = await fetch(`${API_BASE_URL}/api/admin-events`, {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<typeof formData> }) => {
+      return apiRequest(`/api/admin-events?id=${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
         body: JSON.stringify({
-          id: editing.id,
-          title,
-          description,
-          startDate: new Date(startDate).toISOString(),
-          endDate: endDate ? new Date(endDate).toISOString() : null,
-          location: location || null,
-          imageUrl: imageUrl || null,
-          isActive,
+          ...data,
+          startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+          endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
         }),
-      });
-      if (!res.ok) throw new Error('Failed to update event');
-      return res.json();
+      }, accessToken);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+      setIsModalOpen(false);
+      setEditingEvent(null);
       resetForm();
-      void queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-events`, {
+      return apiRequest(`/api/admin-events?id=${id}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ id }),
-      });
-      if (!res.ok) throw new Error('Failed to delete event');
-      return res.json();
+      }, accessToken);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['adminEvents'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
     },
   });
 
   const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setStartDate('');
-    setEndDate('');
-    setLocation('');
-    setImageUrl('');
-    setIsActive(true);
-    setEditing(null);
-    setOpen(false);
+    setFormData({
+      title: '',
+      description: '',
+      startDate: '',
+      endDate: '',
+      location: '',
+      imageUrl: '',
+      isActive: true,
+    });
+    setEditingEvent(null);
   };
 
-  const handleEdit = (event: EventDto) => {
-    setEditing(event);
-    setTitle(event.title);
-    setDescription(event.description);
-    setStartDate(new Date(event.startDate).toISOString().slice(0, 16));
-    setEndDate(event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : '');
-    setLocation(event.location || '');
-    setImageUrl(event.imageUrl || '');
-    setIsActive(event.isActive);
-    setOpen(true);
+  const handleEdit = (event: Event) => {
+    setEditingEvent(event);
+    setFormData({
+      title: event.title,
+      description: event.description,
+      startDate: new Date(event.startDate).toISOString().slice(0, 16),
+      endDate: event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : '',
+      location: event.location || '',
+      imageUrl: event.imageUrl || '',
+      isActive: event.isActive,
+    });
+    setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editing) {
-      updateMutation.mutate();
+    if (editingEvent) {
+      updateMutation.mutate({ id: editingEvent.id, data: formData });
     } else {
-      createMutation.mutate();
+      createMutation.mutate(formData);
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-emerald-50">Events Management</h1>
-        <Button onClick={() => setOpen(true)} disabled={open}>
-          Add Event
+        <div>
+          <h1 className="text-2xl font-bold text-[#0A3D35]">Events Management</h1>
+          <p className="text-sm text-gray-600 mt-1">Create and manage platform events</p>
+        </div>
+        <Button
+          onClick={() => {
+            resetForm();
+            setIsModalOpen(true);
+          }}
+          leftIcon={<Plus className="w-4 h-4" />}
+        >
+          Create Event
         </Button>
       </div>
 
-      {open && (
-        <Card className="px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-emerald-50">
-              {editing ? 'Edit Event' : 'Add New Event'}
-            </h2>
-            <button
-              onClick={resetForm}
-              className="text-xs text-emerald-100/70 hover:text-emerald-50"
-            >
-              Cancel
-            </button>
-          </div>
-          <form onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-2 text-xs">
-            <div className="space-y-1 md:col-span-2">
-              <label className="text-emerald-100/80">Title *</label>
-              <input
-                className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1 md:col-span-2">
-              <label className="text-emerald-100/80">Description *</label>
-              <textarea
-                className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50 min-h-[120px]"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-emerald-100/80">Start Date *</label>
-              <input
-                type="datetime-local"
-                className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-emerald-100/80">End Date (optional)</label>
-              <input
-                type="datetime-local"
-                className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-emerald-100/80">Location</label>
-              <input
-                className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-emerald-100/80">Image URL</label>
-              <input
-                type="url"
-                className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1 md:col-span-2">
-              <label className="flex items-center gap-2 text-emerald-100/80">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded border-emerald-400/30"
-                />
-                Active (visible to users)
-              </label>
-            </div>
-            <div className="md:col-span-2 flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={resetForm}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
-              >
-                {createMutation.isPending || updateMutation.isPending
-                  ? 'Saving…'
-                  : editing
-                    ? 'Update Event'
-                    : 'Create Event'}
-              </Button>
-            </div>
-          </form>
+      {isLoading ? (
+        <Card>
+          <div className="p-8 text-center text-gray-500">Loading events...</div>
         </Card>
-      )}
-
-      <Card className="px-4 py-3 text-xs">
-        <div className="text-emerald-100/80 mb-3 font-semibold">
-          Events ({data?.events?.length || 0})
-        </div>
-        {data?.events?.length ? (
-          <div className="space-y-2">
-            {data.events.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-start justify-between rounded-xl border border-emerald-400/20 bg-black/40 px-3 py-2"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="font-semibold text-emerald-50">{event.title}</div>
-                    {event.isActive ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-gray-500/20 text-gray-300">
-                        Inactive
-                      </span>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {data?.events?.map((event) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card className="h-full flex flex-col">
+                {event.imageUrl && (
+                  <img
+                    src={event.imageUrl}
+                    alt={event.title}
+                    className="w-full h-48 object-cover rounded-t-2xl"
+                  />
+                )}
+                <div className="flex-1 p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-[#0A3D35]">{event.title}</h3>
+                    <Badge variant={event.isActive ? 'success' : 'default'}>
+                      {event.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-3">{event.description}</p>
+                  <div className="space-y-2 text-sm text-gray-500 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>{new Date(event.startDate).toLocaleString()}</span>
+                    </div>
+                    {event.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>{event.location}</span>
+                      </div>
                     )}
                   </div>
-                  <div className="text-[11px] text-emerald-100/70 mb-1 line-clamp-2">
-                    {event.description}
-                  </div>
-                  <div className="text-[11px] text-emerald-100/60">
-                    {new Date(event.startDate).toLocaleString()} · {event.location || 'No location'}
+                  <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(event)}
+                      className="flex-1"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this event?')) {
+                          deleteMutation.mutate(event.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2 ml-3">
-                  <button
-                    onClick={() => handleEdit(event)}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Delete event "${event.title}"?`)) {
-                        deleteMutation.mutate(event.id);
-                      }
-                    }}
-                    className="text-xs text-red-400 hover:text-red-300 underline"
-                    disabled={deleteMutation.isPending}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          resetForm();
+        }}
+        title={editingEvent ? 'Edit Event' : 'Create New Event'}
+        size="lg"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            required
+          />
+          <Textarea
+            label="Description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            rows={4}
+            required
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Start Date"
+              type="datetime-local"
+              value={formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              required
+            />
+            <Input
+              label="End Date (Optional)"
+              type="datetime-local"
+              value={formData.endDate}
+              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+            />
           </div>
-        ) : (
-          <div className="text-emerald-100/70">No events yet.</div>
-        )}
-      </Card>
+          <Input
+            label="Location"
+            leftIcon={<MapPin className="w-5 h-5" />}
+            value={formData.location}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+          />
+          <Input
+            label="Image URL"
+            leftIcon={<ImageIcon className="w-5 h-5" />}
+            value={formData.imageUrl}
+            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+          />
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={formData.isActive}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-[#18F59B] focus:ring-[#18F59B]"
+            />
+            <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+              Event is active
+            </label>
+          </div>
+          <div className="flex items-center gap-3 pt-4">
+            <Button
+              type="submit"
+              isLoading={createMutation.isPending || updateMutation.isPending}
+              className="flex-1"
+            >
+              {editingEvent ? 'Update Event' : 'Create Event'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsModalOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
-

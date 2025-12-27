@@ -1,161 +1,123 @@
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button } from '@tmp/ui';
+import { motion } from 'framer-motion';
+import { Settings, Save, AlertTriangle } from 'lucide-react';
+import { Card, Button, Input, Textarea } from '../components/ui';
 import { useAuth } from '../auth';
-import { FormEvent, useState, useEffect } from 'react';
-
-interface AppSettingsDto {
-  id: string;
-  maintenanceMode: boolean;
-  faqJson?: string | null;
-  makkahStreamUrl?: string | null;
-}
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:3000';
+import { apiRequest } from '../lib/api';
 
 export function SettingsPage() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
-  const [faqDraft, setFaqDraft] = useState('');
-  const [makkahStreamUrl, setMakkahStreamUrl] = useState('');
+  const [formData, setFormData] = useState({
+    maintenanceMode: false,
+    faqJson: '',
+    makkahStreamUrl: '',
+  });
 
-  const { data } = useQuery<{ settings: AppSettingsDto }>({
-    queryKey: ['adminAppSettings'],
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-app-settings'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-app-settings`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!res.ok) throw new Error('Failed to load settings');
-      return (await res.json()) as { settings: AppSettingsDto };
+      return apiRequest<{ settings: any }>('/api/admin-app-settings', {}, accessToken);
     },
     enabled: !!accessToken,
   });
 
   useEffect(() => {
-    if (!data?.settings) return;
-
-    if (data.settings.faqJson && !faqDraft) {
-      setFaqDraft(data.settings.faqJson);
-    }
-    if (data.settings.makkahStreamUrl && !makkahStreamUrl) {
-      setMakkahStreamUrl(data.settings.makkahStreamUrl);
-    }
-  }, [data, faqDraft, makkahStreamUrl]);
-
-  const mutation = useMutation({
-    mutationFn: async (settings: Partial<AppSettingsDto>) => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-app-settings`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(settings),
+    if (data?.settings) {
+      setFormData({
+        maintenanceMode: data.settings.maintenanceMode || false,
+        faqJson: data.settings.faqJson || '',
+        makkahStreamUrl: data.settings.makkahStreamUrl || '',
       });
-      if (!res.ok) throw new Error('Failed to update settings');
-      return res.json();
+    }
+  }, [data]);
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      return apiRequest('/api/admin-app-settings', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }, accessToken);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['adminAppSettings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-app-settings'] });
     },
   });
 
-  const settings = data?.settings;
-
-  const toggleMaintenance = () => {
-    if (!settings) return;
-    mutation.mutate({
-      maintenanceMode: !settings.maintenanceMode,
-      faqJson: settings.faqJson,
-      makkahStreamUrl: settings.makkahStreamUrl || '',
-    });
-  };
-
-  const handleFaqSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!settings) return;
-    mutation.mutate({
-      maintenanceMode: settings.maintenanceMode,
-      faqJson: faqDraft,
-      makkahStreamUrl: settings.makkahStreamUrl || '',
-    });
+    updateMutation.mutate(formData);
   };
 
-  const handleMakkahStreamSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!settings) return;
-    mutation.mutate({
-      maintenanceMode: settings.maintenanceMode,
-      faqJson: settings.faqJson,
-      makkahStreamUrl: makkahStreamUrl,
-    });
-  };
+  if (isLoading) {
+    return (
+      <Card>
+        <div className="p-8 text-center text-gray-500">Loading settings...</div>
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-emerald-50">App settings</h1>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-emerald-100/80 mb-1">Maintenance mode</div>
-            <p className="text-[11px] text-emerald-100/70">
-              When enabled, public clients can show a friendly maintenance screen while admins continue working.
-            </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-[#0A3D35]">App Settings</h1>
+        <p className="text-sm text-gray-600 mt-1">Configure application-wide settings</p>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <div className="space-y-6">
+            {/* Maintenance Mode */}
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold text-gray-900">Maintenance Mode</label>
+                    <input
+                      type="checkbox"
+                      checked={formData.maintenanceMode}
+                      onChange={(e) => setFormData({ ...formData, maintenanceMode: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300 text-[#18F59B] focus:ring-[#18F59B]"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    When enabled, the app will be unavailable to regular users
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Makkah Stream URL */}
+            <Input
+              label="Default Makkah Stream URL"
+              value={formData.makkahStreamUrl}
+              onChange={(e) => setFormData({ ...formData, makkahStreamUrl: e.target.value })}
+              placeholder="https://..."
+            />
+
+            {/* FAQ JSON */}
+            <Textarea
+              label="FAQ JSON"
+              value={formData.faqJson}
+              onChange={(e) => setFormData({ ...formData, faqJson: e.target.value })}
+              rows={10}
+              placeholder='[{"question": "...", "answer": "..."}]'
+            />
+
+            <div className="flex items-center justify-end pt-4 border-t border-gray-200">
+              <Button
+                type="submit"
+                isLoading={updateMutation.isPending}
+                leftIcon={<Save className="w-4 h-4" />}
+              >
+                Save Settings
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="secondary"
-            className="text-[11px] px-3 py-1"
-            disabled={mutation.isPending || !settings}
-            onClick={toggleMaintenance}
-          >
-            {settings?.maintenanceMode ? 'Disable' : 'Enable'}
-          </Button>
-        </div>
-      </Card>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="text-emerald-100/80 mb-1">FAQ configuration (JSON)</div>
-        <p className="text-[11px] text-emerald-100/70 mb-2">
-          Store frequently asked questions as JSON. The marketing site or mobile app can render this dynamically.
-        </p>
-        <form onSubmit={handleFaqSubmit} className="space-y-2">
-          <textarea
-            className="w-full h-32 rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50 text-[11px] font-mono"
-            value={faqDraft}
-            onChange={e => setFaqDraft(e.target.value)}
-          />
-          <Button
-            type="submit"
-            variant="secondary"
-            className="text-[11px] px-3 py-1"
-            disabled={mutation.isPending || !settings}
-          >
-            Save FAQ JSON
-          </Button>
-        </form>
-      </Card>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="text-emerald-100/80 mb-1">Makkah Live Stream URL</div>
-        <p className="text-[11px] text-emerald-100/70 mb-2">
-          Configure the live stream URL for Makkah. This will be available to users in the mobile app.
-        </p>
-        <form onSubmit={handleMakkahStreamSubmit} className="space-y-2">
-          <input
-            type="url"
-            className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50 text-[11px]"
-            placeholder="https://example.com/makkah-stream"
-            value={makkahStreamUrl}
-            onChange={e => setMakkahStreamUrl(e.target.value)}
-          />
-          <Button
-            type="submit"
-            variant="secondary"
-            className="text-[11px] px-3 py-1"
-            disabled={mutation.isPending || !settings}
-          >
-            Save Stream URL
-          </Button>
-        </form>
-      </Card>
+        </Card>
+      </form>
     </div>
   );
 }
-

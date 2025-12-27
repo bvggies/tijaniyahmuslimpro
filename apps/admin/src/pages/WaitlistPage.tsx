@@ -1,14 +1,18 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '@tmp/ui';
+import { motion } from 'framer-motion';
+import { UserPlus, Mail, MessageSquare } from 'lucide-react';
+import { Card, Badge, Table, TableRow, TableCell } from '../components/ui';
 import { useAuth } from '../auth';
+import { apiRequest } from '../lib/api';
 
-interface SubscriberDto {
+interface Subscriber {
   id: string;
   email: string;
   createdAt: string;
 }
 
-interface ContactDto {
+interface Contact {
   id: string;
   name: string;
   email: string;
@@ -16,67 +20,107 @@ interface ContactDto {
   createdAt: string;
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:3000';
-
 export function WaitlistPage() {
   const { accessToken } = useAuth();
+  const [activeTab, setActiveTab] = useState<'waitlist' | 'contacts'>('waitlist');
 
-  const { data } = useQuery({
-    queryKey: ['adminWaitlist'],
+  const { data: waitlistData, isLoading: waitlistLoading } = useQuery({
+    queryKey: ['admin-waitlist'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-waitlist`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!res.ok) throw new Error('Failed to load waitlist');
-      return (await res.json()) as { subscribers: SubscriberDto[]; contacts: ContactDto[] };
+      return apiRequest<{ subscribers: Subscriber[] }>('/api/admin-waitlist', {}, accessToken);
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && activeTab === 'waitlist',
+  });
+
+  const { data: contactsData, isLoading: contactsLoading } = useQuery({
+    queryKey: ['admin-contacts'],
+    queryFn: async () => {
+      return apiRequest<{ contacts: Contact[] }>('/api/admin-waitlist', {}, accessToken).catch(() => ({ contacts: [] }));
+    },
+    enabled: !!accessToken && activeTab === 'contacts',
   });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-emerald-50">Waitlist & contacts</h1>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="text-emerald-100/80 mb-1">Subscribers</div>
-        {data?.subscribers?.length ? (
-          data.subscribers.map(s => (
-            <div
-              key={s.id}
-              className="flex items-center justify-between rounded-xl border border-emerald-400/20 bg-black/40 px-3 py-2"
-            >
-              <span className="text-emerald-50">{s.email}</span>
-              <span className="text-[11px] text-emerald-100/70">
-                {new Date(s.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          ))
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-[#0A3D35]">Waitlist & Contacts</h1>
+        <p className="text-sm text-gray-600 mt-1">Manage subscribers and contact submissions</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab('waitlist')}
+          className={`px-4 py-2 font-medium transition-colors ${
+            activeTab === 'waitlist'
+              ? 'text-[#18F59B] border-b-2 border-[#18F59B]'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Waitlist ({waitlistData?.subscribers?.length || 0})
+        </button>
+        <button
+          onClick={() => setActiveTab('contacts')}
+          className={`px-4 py-2 font-medium transition-colors ${
+            activeTab === 'contacts'
+              ? 'text-[#18F59B] border-b-2 border-[#18F59B]'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Contacts ({contactsData?.contacts?.length || 0})
+        </button>
+      </div>
+
+      {activeTab === 'waitlist' ? (
+        waitlistLoading ? (
+          <Card>
+            <div className="p-8 text-center text-gray-500">Loading waitlist...</div>
+          </Card>
         ) : (
-          <div className="text-[11px] text-emerald-100/70">No subscribers yet.</div>
-        )}
-      </Card>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="text-emerald-100/80 mb-1">Contact submissions</div>
-        {data?.contacts?.length ? (
-          data.contacts.map(c => (
-            <div
-              key={c.id}
-              className="rounded-xl border border-emerald-400/20 bg-black/40 px-3 py-2"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-emerald-50">{c.name}</span>
-                <span className="text-[11px] text-emerald-100/70">
-                  {new Date(c.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="text-[11px] text-emerald-100/80 mb-1">{c.email}</div>
-              <div className="text-[11px] text-emerald-100/80">{c.message}</div>
-            </div>
-          ))
+          <Card padding="none">
+            <Table headers={['Email', 'Subscribed Date']}>
+              {waitlistData?.subscribers?.map((subscriber) => (
+                <TableRow key={subscriber.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <span>{subscriber.email}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{new Date(subscriber.createdAt).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))}
+            </Table>
+          </Card>
+        )
+      ) : (
+        contactsLoading ? (
+          <Card>
+            <div className="p-8 text-center text-gray-500">Loading contacts...</div>
+          </Card>
         ) : (
-          <div className="text-[11px] text-emerald-100/70">No contact messages yet.</div>
-        )}
-      </Card>
+          <div className="space-y-4">
+            {contactsData?.contacts?.map((contact) => (
+              <motion.div
+                key={contact.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#0A3D35] mb-1">{contact.name}</h3>
+                      <p className="text-sm text-gray-600">{contact.email}</p>
+                    </div>
+                    <Badge>{new Date(contact.createdAt).toLocaleDateString()}</Badge>
+                  </div>
+                  <p className="text-gray-700 whitespace-pre-wrap">{contact.message}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        )
+      )}
     </div>
   );
 }
-

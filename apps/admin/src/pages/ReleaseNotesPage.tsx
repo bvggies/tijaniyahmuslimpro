@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, Button } from '@tmp/ui';
+import { motion } from 'framer-motion';
+import { FileText, Plus, Edit, Trash2 } from 'lucide-react';
+import { Card, Button, Input, Modal, Textarea } from '../components/ui';
 import { useAuth } from '../auth';
-import { FormEvent, useState } from 'react';
+import { apiRequest } from '../lib/api';
 
-interface ReleaseNoteDto {
+interface ReleaseNote {
   id: string;
   version: string;
   title: string;
@@ -11,120 +14,211 @@ interface ReleaseNoteDto {
   createdAt: string;
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:3000';
-
 export function ReleaseNotesPage() {
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
-  const [version, setVersion] = useState('');
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<ReleaseNote | null>(null);
+  const [formData, setFormData] = useState({
+    version: '',
+    title: '',
+    body: '',
+  });
 
-  const { data } = useQuery({
-    queryKey: ['adminReleaseNotes'],
+  const { data, isLoading } = useQuery({
+    queryKey: ['admin-release-notes'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-release-notes`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (!res.ok) throw new Error('Failed to load release notes');
-      return (await res.json()) as { notes: ReleaseNoteDto[] };
+      return apiRequest<{ notes: ReleaseNote[] }>('/api/admin-release-notes', {}, accessToken);
     },
     enabled: !!accessToken,
   });
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/admin-release-notes`, {
+  const createMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      return apiRequest('/api/admin-release-notes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ version, title, body }),
-      });
-      if (!res.ok) throw new Error('Failed to create note');
-      return res.json();
+        body: JSON.stringify(data),
+      }, accessToken);
     },
     onSuccess: () => {
-      setVersion('');
-      setTitle('');
-      setBody('');
-      void queryClient.invalidateQueries({ queryKey: ['adminReleaseNotes'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-release-notes'] });
+      setIsModalOpen(false);
+      resetForm();
     },
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<typeof formData> }) => {
+      return apiRequest(`/api/admin-release-notes?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-release-notes'] });
+      setIsModalOpen(false);
+      setEditingNote(null);
+      resetForm();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest(`/api/admin-release-notes?id=${id}`, {
+        method: 'DELETE',
+      }, accessToken);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-release-notes'] });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({ version: '', title: '', body: '' });
+    setEditingNote(null);
+  };
+
+  const handleEdit = (note: ReleaseNote) => {
+    setEditingNote(note);
+    setFormData({
+      version: note.version,
+      title: note.title,
+      body: note.body,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate();
+    if (editingNote) {
+      updateMutation.mutate({ id: editingNote.id, data: formData });
+    } else {
+      createMutation.mutate(formData);
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-emerald-50">Release notes</h1>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="flex items-center justify-between mb-1">
-          <div className="text-emerald-100/80">Create a new entry</div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#0A3D35]">Release Notes</h1>
+          <p className="text-sm text-gray-600 mt-1">Manage app release notes and updates</p>
         </div>
-        <form onSubmit={handleSubmit} className="grid gap-2 md:grid-cols-2">
-          <div className="space-y-1">
-            <label className="text-emerald-100/80">Version</label>
-            <input
-              className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-              value={version}
-              onChange={e => setVersion(e.target.value)}
-              placeholder="1.0.0"
-              required
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-emerald-100/80">Title</label>
-            <input
-              className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-1 md:col-span-2">
-            <label className="text-emerald-100/80">Body</label>
-            <textarea
-              className="w-full rounded-xl border border-emerald-400/30 bg-black/40 px-3 py-2 text-emerald-50"
-              value={body}
-              onChange={e => setBody(e.target.value)}
-              required
-            />
-          </div>
-          <div className="md:col-span-2 flex justify-end">
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving…' : 'Save release note'}
+        <Button
+          onClick={() => {
+            resetForm();
+            setIsModalOpen(true);
+          }}
+          leftIcon={<Plus className="w-4 h-4" />}
+        >
+          Create Release Note
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <Card>
+          <div className="p-8 text-center text-gray-500">Loading release notes...</div>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {data?.notes?.map((note) => (
+            <motion.div
+              key={note.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="px-3 py-1 bg-[#18F59B]/10 text-[#18F59B] rounded-full text-sm font-semibold">
+                        v{note.version}
+                      </span>
+                      <h3 className="text-lg font-semibold text-[#0A3D35]">{note.title}</h3>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {new Date(note.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(note)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this release note?')) {
+                          deleteMutation.mutate(note.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-gray-700 whitespace-pre-wrap">{note.body}</p>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          resetForm();
+        }}
+        title={editingNote ? 'Edit Release Note' : 'Create Release Note'}
+        size="lg"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Version"
+            value={formData.version}
+            onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+            placeholder="e.g., 1.2.0"
+            required
+          />
+          <Input
+            label="Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            required
+          />
+          <Textarea
+            label="Body"
+            value={formData.body}
+            onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+            rows={8}
+            required
+          />
+          <div className="flex items-center gap-3 pt-4">
+            <Button
+              type="submit"
+              isLoading={createMutation.isPending || updateMutation.isPending}
+              className="flex-1"
+            >
+              {editingNote ? 'Update Note' : 'Create Note'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsModalOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
             </Button>
           </div>
         </form>
-      </Card>
-      <Card className="px-4 py-3 text-xs space-y-2">
-        <div className="text-emerald-100/80 mb-1">History</div>
-        {data?.notes?.length ? (
-          data.notes.map(n => (
-            <div
-              key={n.id}
-              className="rounded-xl border border-emerald-400/20 bg-black/40 px-3 py-2"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-emerald-50 font-semibold">
-                  v{n.version} – {n.title}
-                </span>
-                <span className="text-[11px] text-emerald-100/70">
-                  {new Date(n.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              <p className="text-[11px] text-emerald-100/80 whitespace-pre-line">{n.body}</p>
-            </div>
-          ))
-        ) : (
-          <div className="text-[11px] text-emerald-100/70">No release notes yet.</div>
-        )}
-      </Card>
+      </Modal>
     </div>
   );
 }
-
