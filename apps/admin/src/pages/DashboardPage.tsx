@@ -76,7 +76,10 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      whileHover={{ 
+        y: -4,
+        transition: { duration: 0.2, ease: 'easeOut' }
+      }}
       style={{
         position: 'relative',
         backgroundColor: '#ffffff',
@@ -84,16 +87,15 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
         padding: '1.5rem',
         border: '1px solid #f3f4f6',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)',
-        transition: 'all 0.3s ease',
         overflow: 'hidden',
       }}
       onMouseEnter={(e) => {
+        // Only handle shadow changes, let Framer Motion handle transform via whileHover
         e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)';
-        e.currentTarget.style.transform = 'translateY(-4px)';
       }}
       onMouseLeave={(e) => {
+        // Only handle shadow changes, let Framer Motion handle transform via whileHover
         e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)';
-        e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
       {/* Gradient accent bar */}
