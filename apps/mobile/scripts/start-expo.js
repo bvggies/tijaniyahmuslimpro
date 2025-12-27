@@ -6,19 +6,17 @@ const { spawn } = require('child_process');
 
 // Set environment variables to avoid network/API issues
 process.env.EXPO_NO_TELEMETRY = '1';
-// Disable dependency version checks that cause "Body is unusable" errors
-process.env.EXPO_NO_DEPENDENCY_CHECK = '1';
 
 const projectRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 
-// Default to --no-dev-client if no mode specified
-const expoArgs = ['expo', 'start', '--no-dev-client'];
+// Build expo start command
+const expoArgs = ['expo', 'start'];
 if (args.length > 0) {
   expoArgs.push(...args);
 } else {
-  // Default to localhost to avoid network issues
-  expoArgs.push('--localhost');
+  // Default to offline mode to avoid network fetch errors
+  expoArgs.push('--offline', '--localhost');
 }
 
 console.log('Starting Expo with optimized settings...');
@@ -31,7 +29,6 @@ const child = spawn('npx', expoArgs, {
   env: {
     ...process.env,
     EXPO_NO_TELEMETRY: '1',
-    EXPO_NO_DEPENDENCY_CHECK: '1',
   },
 });
 
