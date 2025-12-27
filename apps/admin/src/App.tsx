@@ -83,7 +83,10 @@ function Shell({ children }: { children: React.ReactNode }) {
         initial={{ x: -250 }}
         animate={{ x: isSidebarOpen ? 0 : -250 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-xl border-r border-gray-200/50 shadow-modern-lg flex flex-col md:relative md:translate-x-0 md:shadow-none"
+        className="fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-xl border-r border-gray-200/50 flex flex-col md:relative md:translate-x-0"
+        style={{
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+        }}
       >
         {/* Sidebar Header */}
         <div className="px-6 py-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-br from-white to-gray-50/50">
@@ -95,7 +98,15 @@ function Shell({ children }: { children: React.ReactNode }) {
               <Home className="w-6 h-6 text-white" />
             </motion.div>
             <div>
-              <div className="text-lg font-bold bg-gradient-to-r from-[#0A3D35] to-[#18F59B] bg-clip-text text-transparent">
+              <div 
+                className="text-lg font-bold"
+                style={{
+                  background: 'linear-gradient(to right, #0A3D35, #18F59B)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
                 Tijaniyah
               </div>
               <div className="text-xs text-gray-500 font-medium">Admin Panel</div>
@@ -180,7 +191,15 @@ function Shell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0A3D35] to-[#18F59B] bg-clip-text text-transparent capitalize">
+            <h1 
+              className="text-2xl font-bold capitalize"
+              style={{
+                background: 'linear-gradient(to right, #0A3D35, #18F59B)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
               {breadcrumbs.length > 0 ? (
                 <div className="flex items-center gap-2">
                   {breadcrumbs.map((crumb, index) => (

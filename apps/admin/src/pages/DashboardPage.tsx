@@ -77,7 +77,16 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="group relative bg-white rounded-2xl p-6 shadow-modern border border-gray-100 hover:shadow-modern-lg transition-all duration-300 overflow-hidden"
+      className="group relative bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 overflow-hidden"
+      style={{
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)';
+      }}
     >
       {/* Gradient accent bar */}
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.gradient}`} />
@@ -100,7 +109,15 @@ function StatCard({ title, value, change, icon, color, description, trend }: Sta
         )}
       </div>
       <div>
-        <div className="text-3xl font-bold bg-gradient-to-br from-[#0A3D35] to-[#18F59B] bg-clip-text text-transparent mb-1">
+        <div 
+          className="text-3xl font-bold mb-1"
+          style={{
+            background: 'linear-gradient(to bottom right, #0A3D35, #18F59B)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
           {value}
         </div>
         <div className="text-sm font-medium text-gray-700 mb-1">{title}</div>
@@ -235,7 +252,11 @@ export function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden bg-gradient-to-br from-[#0A3D35] via-[#0d4d42] to-[#18F59B] rounded-3xl p-8 text-white shadow-modern-lg"
+        className="relative overflow-hidden rounded-3xl p-8 text-white"
+        style={{
+          background: 'linear-gradient(to bottom right, #0A3D35, #0d4d42, #18F59B)',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+        }}
       >
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32" />
@@ -275,9 +296,22 @@ export function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <Card className="shadow-modern border-gray-100">
+        <Card 
+          className="border-gray-100"
+          style={{
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+          }}
+        >
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-            <h3 className="text-xl font-bold bg-gradient-to-r from-[#0A3D35] to-[#18F59B] bg-clip-text text-transparent">
+            <h3 
+              className="text-xl font-bold"
+              style={{
+                background: 'linear-gradient(to right, #0A3D35, #18F59B)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
               Recent Activity
             </h3>
             <button className="text-sm font-semibold text-[#18F59B] hover:text-[#0A3D35] transition-colors flex items-center gap-1 group">
