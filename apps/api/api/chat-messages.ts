@@ -66,28 +66,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return badRequest(res, apiError('FORBIDDEN', 'FORBIDDEN'));
     }
 
-    // Create message and update room's updatedAt in a transaction
-    const [message] = await prisma.$transaction([
-      prisma.message.create({
-        data: {
-          roomId,
-          senderId: user.id,
-          content,
-        },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-            },
+    // Create message - Prisma will automatically update room's updatedAt via @updatedAt
+    const message = await prisma.message.create({
+      data: {
+        roomId,
+        senderId: user.id,
+        content,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
           },
         },
-      }),
-      prisma.chatRoom.update({
-        where: { id: roomId },
-        data: { updatedAt: new Date() },
-      }),
-    ]);
+      },
+    });
+    
+    // Touch the room to trigger updatedAt (Prisma handles this automatically)
+    await prisma.chatRoom.update({
+      where: { id: roomId },
+      data: {}, // Empty update triggers @updatedAt
+    });
 
     ok(res, {
       message: {

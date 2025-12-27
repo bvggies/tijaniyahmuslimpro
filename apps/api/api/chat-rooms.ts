@@ -49,7 +49,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
         },
         orderBy: [
-          { updatedAt: 'desc' },
           { createdAt: 'desc' },
         ],
       });

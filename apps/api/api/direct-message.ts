@@ -42,18 +42,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
         },
         orderBy: {
-          updatedAt: 'desc',
+          createdAt: 'desc',
         },
       });
 
       // Transform to include recipient info
-      const transformedRooms = rooms.map((room) => {
-        const recipient = room.members.find((m) => m.userId !== user.id)?.user;
+      const transformedRooms = (rooms as any[]).map((room: any) => {
+        const recipient = room.members?.find((m: any) => m.userId !== user.id)?.user;
         return {
           id: room.id,
           name: recipient?.name || 'Unknown',
           recipient: recipient,
-          lastMessage: room.messages[0]
+          lastMessage: room.messages?.[0]
             ? {
                 content: room.messages[0].content,
                 timestamp: room.messages[0].createdAt.toISOString(),
