@@ -332,46 +332,11 @@ export function DashboardPage() {
         }}
       >
         {/* Decorative elements */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '16rem',
-            height: '16rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '50%',
-            filter: 'blur(3rem)',
-            marginRight: '-8rem',
-            marginTop: '-8rem',
-          }}
-        />
-        <div 
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: '12rem',
-            height: '12rem',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '50%',
-            filter: 'blur(3rem)',
-            marginLeft: '-6rem',
-            marginBottom: '-6rem',
-          }}
-        />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-3xl -ml-24 -mb-24" />
         
-        <div style={{ position: 'relative', zIndex: 10 }}>
-          <h2 
-            style={{
-              fontSize: '1.875rem',
-              fontWeight: '700',
-              marginBottom: '0.75rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-            }}
-          >
+        <div className="relative z-10">
+          <h2 className="text-3xl font-bold mb-3 flex items-center gap-3">
             Welcome back! 
             <motion.span
               animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
@@ -380,9 +345,7 @@ export function DashboardPage() {
               👋
             </motion.span>
           </h2>
-          <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.125rem' }}>
-            Here's what's happening with your platform today.
-          </p>
+          <p className="text-white/90 text-lg">Here's what's happening with your platform today.</p>
         </div>
       </motion.div>
 
