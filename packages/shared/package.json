@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && node scripts/generate-design-tokens.cjs"
   },
   "dependencies": {
     "zod": "^3.23.8"
